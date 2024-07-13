@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 axum = "0.7.4"
+diesel-async = { version = "0.4.1", features = ["deadpool", "postgres", "tokio"] }
 shuttle-axum = "0.46.0"
 shuttle-runtime = "0.46.0"
+shuttle-shared-db = { version = "0.46.0", features = ["diesel-async-deadpool", "postgres"] }
 tokio = "1.28.2"
