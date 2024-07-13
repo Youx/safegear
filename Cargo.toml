@@ -5,10 +5,12 @@ edition = "2021"
 
 [dependencies]
 axum = "0.7.4"
-diesel = "2.1.0"
-diesel-async = { version = "0.4.1", features = ["deadpool", "postgres", "tokio"] }
+diesel = { version = "2.1.0", features = ["postgres"] }
+diesel-async = { version = "0.4.1", features = ["deadpool", "postgres", "tokio", "async-connection-wrapper"] }
 diesel_migrations = { version = "2.1", features = ["postgres"] }
 shuttle-axum = "0.46.0"
 shuttle-runtime = "0.46.0"
 shuttle-shared-db = { version = "0.46.0", features = ["diesel-async-deadpool", "postgres"] }
 tokio = "1.28.2"
+tracing = { version = "0.1.40", features = ["log"] }
+tracing-subscriber = "0.3.18"
