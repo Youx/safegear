@@ -1,9 +1,15 @@
+#[macro_use]
+pub mod db;
+pub mod api;
 pub mod models;
 pub mod schema;
 
 use axum::{routing::get, Router};
 use diesel::Connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations};
+
+use api::Application;
+use db::create_pool;
 
 async fn hello_world() -> &'static str {
     "Hello, world!"
@@ -48,7 +54,12 @@ fn run_migrations_url(url: String) -> tokio::task::JoinHandle<()> {
 async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::ShuttleAxum {
     run_migrations_url(db_url.clone()).await.unwrap();
 
-    let router = Router::new().route("/", get(hello_world));
+    let application = Application {
+        database: create_pool(&db_url),
+    };
+    let router = Router::new()
+        .route("/", get(hello_world))
+        .with_state(application);
 
     Ok(router.into())
 }

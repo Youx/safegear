@@ -82,32 +82,6 @@ pub enum InspectionResult {
     Danger,
 }
 
-impl diesel::Queryable<Jsonb, Pg> for EventData {
-    type Row = serde_json::Value;
-
-    fn build(row: Self::Row) -> diesel::deserialize::Result<Self> {
-        Ok(serde_json::from_value(row)?)
-    }
-}
-impl diesel::deserialize::FromSql<Jsonb, Pg> for EventData {
-    fn from_sql(
-        bytes: <Pg as diesel::backend::Backend>::RawValue<'_>,
-    ) -> diesel::deserialize::Result<Self> {
-        let v = <serde_json::Value as diesel::deserialize::FromSql<Jsonb, Pg>>::from_sql(bytes)?;
-        let event_data = serde_json::from_value(v)?;
-        Ok(event_data)
-    }
-}
-impl diesel::serialize::ToSql<Jsonb, Pg> for EventData {
-    fn to_sql<'b>(
-        &'b self,
-        out: &mut diesel::serialize::Output<'b, '_, Pg>,
-    ) -> diesel::serialize::Result {
-        let v = serde_json::to_value(self)?;
-        <serde_json::Value as diesel::serialize::ToSql<Jsonb, Pg>>::to_sql(&v, &mut out.reborrow())
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, AsExpression)]
 #[diesel(sql_type = Jsonb)]
 #[repr(u8)]
@@ -138,6 +112,7 @@ pub enum EventData {
     /// Event logged when the item is retired
     Retire {} = 4,
 }
+diesel_json!(EventData);
 
 impl EventData {
     fn discriminant(&self) -> u8 {
