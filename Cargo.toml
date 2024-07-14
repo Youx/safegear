@@ -9,11 +9,14 @@ chrono = { version = "0.4.38", features = ["serde"] }
 diesel = { version = "2.1.0", features = ["postgres", "serde_json", "chrono"] }
 diesel-async = { version = "0.4.1", features = ["deadpool", "postgres", "tokio", "async-connection-wrapper"] }
 diesel_migrations = { version = "2.1", features = ["postgres"] }
+schemars = "0.8.21"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
 shuttle-axum = "0.46.0"
 shuttle-runtime = "0.46.0"
 shuttle-shared-db = { version = "0.46.0", features = ["diesel-async-deadpool", "postgres"] }
+thiserror = "1.0.62"
 tokio = "1.28.2"
 tracing = { version = "0.1.40", features = ["log"] }
 tracing-subscriber = "0.3.18"
+ts-rs = { version = "9.0.1", features = ["chrono-impl"] }

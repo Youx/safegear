@@ -8,7 +8,7 @@ use axum::{routing::get, Router};
 use diesel::Connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 
-use api::Application;
+use api::{item_list, Application};
 use db::create_pool;
 
 async fn hello_world() -> &'static str {
@@ -58,6 +58,7 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
         database: create_pool(&db_url),
     };
     let router = Router::new()
+        .route("/items", get(item_list::handler))
         .route("/", get(hello_world))
         .with_state(application);
 
