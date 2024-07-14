@@ -4,11 +4,14 @@ pub mod api;
 pub mod models;
 pub mod schema;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use diesel::Connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 
-use api::{item_list, Application};
+use api::{item_create, item_list, Application};
 use db::create_pool;
 
 async fn hello_world() -> &'static str {
@@ -59,6 +62,7 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
     };
     let router = Router::new()
         .route("/items", get(item_list::handler))
+        .route("/items", post(item_create::handler))
         .route("/", get(hello_world))
         .with_state(application);
 
