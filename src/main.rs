@@ -2,6 +2,8 @@
 pub mod db;
 pub mod api;
 pub mod models;
+#[cfg(debug_assertions)]
+pub mod provisioning;
 pub mod schema;
 
 use axum::{
@@ -28,7 +30,9 @@ fn run_migrations(
 ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     // In debug mode, reset all migrations every time, because
     // we may be debugging migrations.
+    tracing::info!("Reverting all migrations");
     let _ = connection.revert_all_migrations(MIGRATIONS)?;
+    tracing::info!("Applying all migrations");
     let _ = connection.run_pending_migrations(MIGRATIONS)?;
     Ok(())
 }
@@ -37,6 +41,7 @@ fn run_migrations(
     connection: &mut impl MigrationHarness<diesel::pg::Pg>,
 ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     // In release mode, only run pending migrations
+    tracing::info!("Applying new migrations");
     connection.run_pending_migrations(MIGRATIONS)?;
     Ok(())
 }
@@ -55,11 +60,15 @@ fn run_migrations_url(url: String) -> tokio::task::JoinHandle<()> {
 
 #[shuttle_runtime::main]
 async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::ShuttleAxum {
+    let db_pool = create_pool(&db_url);
     run_migrations_url(db_url.clone()).await.unwrap();
 
-    let application = Application {
-        database: create_pool(&db_url),
-    };
+    #[cfg(debug_assertions)]
+    provisioning::provision(&mut db_pool.get().await.unwrap())
+        .await
+        .unwrap();
+
+    let application = Application { database: db_pool };
     let router = Router::new()
         .route("/items", get(item_list::handler))
         .route("/items", post(item_create::handler))
