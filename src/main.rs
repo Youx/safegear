@@ -16,10 +16,6 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 use api::{item_create, item_details, item_list, tag_create, tag_list, Application};
 use db::create_pool;
 
-async fn hello_world() -> &'static str {
-    "Hello, world!"
-}
-
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 use diesel_migrations::MigrationHarness;
 use std::error::Error;
@@ -75,7 +71,6 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
         .route("/items/:id", get(item_details::handler))
         .route("/tags", get(tag_list::handler))
         .route("/tags", post(tag_create::handler))
-        .route("/", get(hello_world))
         .with_state(application);
 
     Ok(router.into())
