@@ -13,7 +13,7 @@ use axum::{
 use diesel::Connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 
-use api::{item_create, item_details, item_list, tag_create, tag_list, Application};
+use api::{item_create, item_details, item_list, r#static, tag_create, tag_list, Application};
 use db::create_pool;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
@@ -60,17 +60,22 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
     run_migrations_url(db_url.clone()).await.unwrap();
 
     #[cfg(debug_assertions)]
-    provisioning::provision(&mut db_pool.get().await.unwrap())
-        .await
-        .unwrap();
+    {
+        provisioning::provision(&mut db_pool.get().await.unwrap())
+            .await
+            .unwrap();
+        r#static::list_assets();
+    }
 
     let application = Application { database: db_pool };
     let router = Router::new()
-        .route("/items", get(item_list::handler))
-        .route("/items", post(item_create::handler))
-        .route("/items/:id", get(item_details::handler))
-        .route("/tags", get(tag_list::handler))
-        .route("/tags", post(tag_create::handler))
+        .fallback(get(r#static::static_handler))
+        .route("/", get(r#static::index_handler))
+        .route("/api/items", get(item_list::handler))
+        .route("/api/items", post(item_create::handler))
+        .route("/api/items/:id", get(item_details::handler))
+        .route("/api/tags", get(tag_list::handler))
+        .route("/api/tags", post(tag_create::handler))
         .with_state(application);
 
     Ok(router.into())

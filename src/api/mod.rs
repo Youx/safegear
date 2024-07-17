@@ -5,6 +5,7 @@ use crate::db::DbPool;
 pub mod item_create;
 pub mod item_details;
 pub mod item_list;
+pub mod r#static;
 pub mod tag_create;
 pub mod tag_list;
 

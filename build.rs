@@ -17,6 +17,6 @@ fn main() {
     build_deps::rerun_if_changed_paths("webui/src/").unwrap();
     build_deps::rerun_if_changed_paths("webui/src/**").unwrap();
     build_deps::rerun_if_changed_paths("webui/src/assets/*").unwrap();
-    build_deps::rerun_if_changed_paths("webui/src/compinents/*").unwrap();
-    build_deps::rerun_if_changed_paths("webui/src/compinents/layouts/*").unwrap();
+    build_deps::rerun_if_changed_paths("webui/src/components/*").unwrap();
+    build_deps::rerun_if_changed_paths("webui/src/components/layouts/*").unwrap();
 }
