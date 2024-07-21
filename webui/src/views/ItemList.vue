@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ItemTable from '@/components/ItemTable.vue'
+</script>
 <template>
-    <div></div>
+  <div>
+    <ItemTable />
+  </div>
 </template>
