@@ -77,3 +77,15 @@ export const useItemSearchStore = defineStore('itemSearch', {
     } as DataTableFilterMeta
   })
 })
+
+export const useAppSettingsStore = defineStore('appSettings', {
+  state: () => ({
+    darkMode: document.querySelector('html')?.classList.contains('my-app-dark')
+  }),
+  actions: {
+    toggle() {
+      this.darkMode = !this.darkMode
+      document.querySelector('html')?.classList.toggle('my-app-dark')
+    }
+  }
+})

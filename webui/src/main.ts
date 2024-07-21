@@ -18,7 +18,7 @@ const app = createApp(App)
     theme: {
       preset: Aura,
       options: {
-        darkModeSelector: 'system'
+        darkModeSelector: '.my-app-dark'
       }
     }
   })
