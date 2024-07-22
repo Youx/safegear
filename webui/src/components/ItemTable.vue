@@ -7,6 +7,7 @@ import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import IconField from 'primevue/iconfield'
 import Button from 'primevue/button'
+import router from '@/router'
 
 const itemStore = useItemsStore()
 const tagStore = useTagsStore()
@@ -25,7 +26,10 @@ const selectedItems = defineModel('selectedItems')
   >
     <template #header>
       <div class="flex overflow-hidden gap-3">
-        <h2 class="flex-grow-1 flex align-items-left justify-content-left">Items</h2>
+        <h2 class="flex-none flex align-items-left justify-content-left">Items</h2>
+        <div class="flex-grow-1 align-items-center flex justify-content-left">
+          <Button icon="pi pi-plus" rounded raised @click="router.push('/items/new')"></Button>
+        </div>
         <div class="flex-none flex align-items-center justify-content-center">
           <IconField>
             <InputIcon>

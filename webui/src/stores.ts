@@ -11,6 +11,12 @@ export const useItemsStore = defineStore('items', {
   state: () => ({
     items: [] as Item[]
   }),
+  getters: {
+    // Unique names of all items
+    names(): string[] {
+      return [...new Set(this.items.map((item) => item.name))].sort()
+    }
+  },
   actions: {
     async details(item_id: bigint): Promise<ItemDetails> {
       const response = await fetch(URL + '/items/' + item_id, { method: 'GET' })
