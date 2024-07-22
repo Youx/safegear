@@ -18,31 +18,58 @@ const TAGS: &[(i64, &'static str, &'static str)] = &[
 ];
 
 // id, name, inspection period days, tags
-const ITEMS: &[(i64, &'static str, Option<i32>, &'static [usize])] = &[
+const ITEMS: &[(
+    i64,
+    &'static str,
+    Option<&'static str>,
+    Option<i32>,
+    &'static [usize],
+)] = &[
     (
         0,
-        "Edelrid BOA 9.8mm 70m Verte #8-2020-0364-002-4",
+        "Edelrid BOA 9.8mm 70m Verte",
+        Some("8-2020-0364-002-4"),
         Some(365),
         &[0],
     ),
     (
         1,
-        "Petzl TANGO 8.5mm 50m Bleue #18E0139605013",
+        "Petzl TANGO 8.5mm 50m Bleue",
+        Some("18E0139605013"),
         Some(365),
         &[1],
     ),
     (
         2,
-        "Petzl TANGO 8.5mm 50m Verte #18E0139603009",
+        "Petzl TANGO 8.5mm 50m Verte",
+        Some("18E0139603009"),
         Some(365),
         &[1],
     ),
-    (3, "Petzl PUR'ANNEAU 180cm #23A0464683696", Some(365), &[3]),
-    (4, "Petzl PUR'ANNEAU 120cm #23K0529072009", Some(365), &[3]),
-    (5, "Petzl PUR'ANNEAU 120cm #19C0184956336", Some(365), &[3]),
-    (6, "Petzl REVERSO #", None, &[2]),
-    (7, "Mammut SMART 2.0 #", None, &[2]),
-    (8, "Mammut WALL ALPINE BELAY #", None, &[2]),
+    (
+        3,
+        "Petzl PUR'ANNEAU 180cm",
+        Some("23A0464683696"),
+        Some(365),
+        &[3],
+    ),
+    (
+        4,
+        "Petzl PUR'ANNEAU 120cm",
+        Some("23K0529072009"),
+        Some(365),
+        &[3],
+    ),
+    (
+        5,
+        "Petzl PUR'ANNEAU 120cm",
+        Some("19C0184956336"),
+        Some(365),
+        &[3],
+    ),
+    (6, "Petzl REVERSO 4", Some("16096QA0258"), None, &[2]),
+    (7, "Mammut SMART 2.0", None, None, &[2]),
+    (8, "Mammut WALL ALPINE BELAY", None, None, &[2]),
 ];
 
 pub(crate) async fn provision(
@@ -68,14 +95,15 @@ pub(crate) async fn provision(
     for item in ITEMS {
         let item_id = InsertItem {
             name: item.1.to_owned(),
-            inspection_period_days: item.2.map(PgInterval::from_days),
+            serial_number: item.2.map(|s| s.to_owned()),
+            inspection_period_days: item.3.map(PgInterval::from_days),
         }
         .insert_into(items::table)
         .returning(items::id)
         .get_result::<i64>(conn)
         .await?;
 
-        for tag in item.3 {
+        for tag in item.4 {
             InsertItemTag {
                 item_id,
                 tag_id: tags[*tag],

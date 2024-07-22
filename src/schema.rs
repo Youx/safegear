@@ -15,6 +15,7 @@ diesel::table! {
         id -> Int8,
         name -> Varchar,
         inspection_period_days -> Nullable<Interval>,
+        serial_number -> Nullable<Varchar>,
     }
 }
 

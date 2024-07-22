@@ -7,6 +7,7 @@ pub struct Item {
     pub id: i64,
     pub name: String,
     pub inspection_period_days: Option<PgInterval>,
+    pub serial_number: Option<String>,
 }
 
 #[derive(Insertable)]
@@ -14,4 +15,5 @@ pub struct Item {
 pub struct InsertItem {
     pub name: String,
     pub inspection_period_days: Option<PgInterval>,
+    pub serial_number: Option<String>,
 }

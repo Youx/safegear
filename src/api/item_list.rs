@@ -17,6 +17,8 @@ pub struct Item {
     name: String,
     /// Optional inspection period
     inspection_period_days: Option<i32>,
+    /// Optional serial number
+    serial_number: Option<String>,
     /// Ids of all tags associated to this item
     tags: Vec<i64>,
 }
@@ -26,6 +28,7 @@ impl From<(ItemModel, Vec<ItemTag>)> for Item {
         Self {
             id: value.0.id,
             name: value.0.name,
+            serial_number: value.0.serial_number,
             inspection_period_days: value
                 .0
                 .inspection_period_days

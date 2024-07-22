@@ -17,6 +17,7 @@ use super::{item_list::Item, ApiResult, Application};
 pub struct CreateItem {
     name: String,
     inspection_period_days: Option<i32>,
+    serial_number: Option<String>,
     tags: Vec<i64>,
 }
 
@@ -28,6 +29,7 @@ pub async fn handler(
     let CreateItem {
         tags,
         name,
+        serial_number,
         inspection_period_days,
     } = data;
     let (item, item_tags) = conn
@@ -36,6 +38,7 @@ pub async fn handler(
                 let item = diesel::insert_into(items::table)
                     .values(InsertItemModel {
                         name,
+                        serial_number,
                         inspection_period_days: inspection_period_days.map(PgInterval::from_days),
                     })
                     .returning(items::all_columns)
