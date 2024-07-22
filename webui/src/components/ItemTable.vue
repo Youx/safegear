@@ -60,7 +60,7 @@ const selectedItems = defineModel('selectedItems')
       </template>
     </Column>
     <Column header="Actions">
-      <template #body="">
+      <template #body="slotProps">
         <div class="flex gap-1">
           <Button
             icon="pi pi-info"
@@ -69,6 +69,7 @@ const selectedItems = defineModel('selectedItems')
             severity="secondary"
             size="small"
             aria-label="Details"
+            @click="router.push('/items/details/' + slotProps.data.id)"
           />
           <Button
             icon="pi pi-trash"
