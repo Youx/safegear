@@ -15,6 +15,7 @@ const TAGS: &[(i64, &'static str, &'static str)] = &[
     (1, "Corde double", "#ccff99"),
     (2, "Système d'assurage", "#ffcc99"),
     (3, "Sangle", "#99ffcc"),
+    (4, "Friend", "#ff99cc"),
 ];
 
 // id, name, inspection period days, tags
@@ -70,6 +71,15 @@ const ITEMS: &[(
     (6, "Petzl REVERSO 4", Some("16096QA0258"), None, &[2]),
     (7, "Mammut SMART 2.0", None, None, &[2]),
     (8, "Mammut WALL ALPINE BELAY", None, None, &[2]),
+    (9, "Black Diamond C4 #0.3", Some("3272"), None, &[4]),
+    (10, "Black Diamond C4 #0.4", Some("3173"), None, &[4]),
+    (11, "Black Diamond C4 #0.5", Some("2126"), None, &[4]),
+    (12, "Black Diamond C4 #0.75", Some("2066"), None, &[4]),
+    (13, "Black Diamond C4 #1", Some("2056"), None, &[4]),
+    (14, "Black Diamond C4 #2", Some("2083"), None, &[4]),
+    (15, "Black Diamond C4 #2", Some("2083"), None, &[4]),
+    (16, "Black Diamond C4 #3", Some("3102"), None, &[4]),
+    (17, "Black Diamond C4 #3", Some("3081"), None, &[4]),
 ];
 
 pub(crate) async fn provision(
