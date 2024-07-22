@@ -22,7 +22,7 @@ const selectedItems = defineModel('selectedItems')
     :rows="20"
     tableStyle="min-width: 50rem"
     v-model:filters="filters.data"
-    :globalFilterFields="['name']"
+    :globalFilterFields="['name', 'serial_number']"
   >
     <template #header>
       <div class="flex overflow-hidden gap-3">
@@ -49,6 +49,7 @@ const selectedItems = defineModel('selectedItems')
     <Column selectionMode="multiple"></Column>
     <Column field="id" header="#"></Column>
     <Column field="name" header="Name"></Column>
+    <Column field="serial_number" header="Serial number"></Column>
     <Column header="Tags">
       <template #body="slotProps">
         <Tag

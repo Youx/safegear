@@ -3,6 +3,7 @@ import { useItemsStore, useTagsStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete'
 import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Button from 'primevue/button'
 import { ref } from 'vue'
@@ -14,6 +15,7 @@ let router = useRouter()
 let formName = defineModel('name', { default: '' })
 let formTags = defineModel('tags', { default: () => [] })
 let formInspection = defineModel('formInspection', { default: null })
+let formSerial = defineModel('formSerial', { default: null })
 // name autocompletion
 const names = ref(itemStore.names)
 function search(event: AutoCompleteCompleteEvent) {
@@ -24,6 +26,7 @@ async function submit() {
   await itemStore.create({
     name: formName.value,
     inspection_period_days: formInspection.value,
+    serial_number: formSerial.value,
     tags: formTags.value
   })
   router.push('/items')
@@ -49,6 +52,12 @@ async function submit() {
       <label class="col-4 mb-0" for="daysBetweenChecks">Days between checks</label>
       <div class="col-8">
         <InputNumber class="h-3rem" :showButtons="true" v-model="formInspection" />
+      </div>
+    </div>
+    <div class="field grid justify-content-end col-9">
+      <label class="col-4 mb-0" for="daysBetweenChecks">Serial number</label>
+      <div class="col-8">
+        <InputText class="h-3rem" v-model="formSerial" />
       </div>
     </div>
     <div class="field grid col-9">
