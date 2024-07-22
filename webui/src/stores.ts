@@ -75,6 +75,7 @@ export const useTagsStore = defineStore('tags', {
 })
 
 import { FilterMatchMode } from '@primevue/core/api'
+import { $dt } from '@primevue/themes'
 export const useItemSearchStore = defineStore('itemSearch', {
   state: () => ({
     data: {
@@ -88,6 +89,11 @@ export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
     darkMode: document.querySelector('html')?.classList.contains('my-app-dark')
   }),
+  getters: {
+    textColor(): string {
+      return $dt('text.color').value[this.darkMode ? 'dark' : 'light'].value
+    }
+  },
   actions: {
     toggle() {
       this.darkMode = !this.darkMode

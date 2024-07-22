@@ -3,6 +3,9 @@ import type { MenuItem } from 'primevue/menuitem'
 import Menubar from 'primevue/menubar'
 import NightMode from '@/components/NightMode.vue'
 import router from '@/router'
+import { useAppSettingsStore } from '@/stores'
+
+const appSettings = useAppSettingsStore()
 
 const items: MenuItem[] = [
   {
@@ -22,7 +25,7 @@ const items: MenuItem[] = [
         height="32px"
         width="32px"
         viewBox="0 0 511.957 511.957"
-        fill="#ffffff"
+        :fill="appSettings.textColor"
         xmlns="http://www.w3.org/2000/svg"
         class="h-8"
       >
