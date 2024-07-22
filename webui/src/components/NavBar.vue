@@ -2,15 +2,16 @@
 import type { MenuItem } from 'primevue/menuitem'
 import Menubar from 'primevue/menubar'
 import NightMode from '@/components/NightMode.vue'
+import router from '@/router'
 
 const items: MenuItem[] = [
   {
     label: 'Items',
-    url: '/items'
+    command: () => router.push('/items')
   },
   {
     label: 'Tags',
-    url: '/tags'
+    command: () => router.push('/tags')
   }
 ]
 </script>
