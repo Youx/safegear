@@ -70,6 +70,12 @@ export const useTagsStore = defineStore('tags', {
         {} as { [key: string]: Tag }
       )
       return tags
+    },
+    async delete(tag_id: bigint) {
+      const response = await fetch(URL + '/tags/' + tag_id, { method: 'DELETE' })
+      await this.refresh()
+      const itemStore = useItemsStore()
+      await itemStore.refresh()
     }
   }
 })

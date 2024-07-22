@@ -13,6 +13,11 @@ const itemStore = useItemsStore()
 const tagStore = useTagsStore()
 const filters = useItemSearchStore()
 const selectedItems = defineModel('selectedItems')
+
+async function refresh() {
+  await itemStore.refresh()
+  await tagStore.refresh()
+}
 </script>
 <template>
   <DataTable
@@ -42,7 +47,7 @@ const selectedItems = defineModel('selectedItems')
           </IconField>
         </div>
         <div class="flex-none flex align-items-center justify-content-center">
-          <Button icon="pi pi-refresh" rounded raised @click="itemStore.refresh()" />
+          <Button icon="pi pi-refresh" rounded raised @click="refresh()" />
         </div>
       </div>
     </template>

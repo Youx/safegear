@@ -41,7 +41,7 @@ const filters = useTagSearchStore()
       <Column field="name" header="Name" />
       <Column field="color" header="Color" />
       <Column header="Actions">
-        <template #body="">
+        <template #body="slotProps">
           <div class="flex gap-1">
             <Button
               icon="pi pi-trash"
@@ -50,6 +50,7 @@ const filters = useTagSearchStore()
               severity="danger"
               size="small"
               aria-label="Delete"
+              @click="store.delete(slotProps.data.id)"
             />
           </div>
         </template>
