@@ -7,6 +7,7 @@ pub mod item_details;
 pub mod item_list;
 pub mod r#static;
 pub mod tag_create;
+pub mod tag_delete;
 pub mod tag_list;
 
 #[derive(thiserror::Error, Debug)]
