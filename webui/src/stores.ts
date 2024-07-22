@@ -84,6 +84,13 @@ export const useItemSearchStore = defineStore('itemSearch', {
     } as DataTableFilterMeta
   })
 })
+export const useTagSearchStore = defineStore('tagSearch', {
+  state: () => ({
+    data: {
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    } as DataTableFilterMeta
+  })
+})
 
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
