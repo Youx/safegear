@@ -17,13 +17,25 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Generate Cargo.lock
+      run: cargo generate-lockfile
+    - name: Restore Rust cache
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Cargo test
-      run: cargo test --verbose
+      run: cargo test --release --verbose
     - name: Upload TypeScript bindings
       uses: actions/upload-artifact@v4
       with:
         name: ts-bindings
         path: target/bindings
+    - name: Save Rust cache
+      uses: actions/cache/save@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
 
   frontend-build:
@@ -59,15 +71,25 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Generate Cargo.lock
+      run: cargo generate-lockfile
+    - name: Restore Rust cache
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Download WebUI
       uses: actions/download-artifact@v4
       with:
         name: webui-dist
         path: webui/dist
-    - name: Build debug
-      run: cargo build
     - name: Build release
       run: cargo build --release
+    - name: Save Rust cache
+      uses: actions/cache/save@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Upload release bin
       uses: actions/upload-artifact@v4
       with:
