@@ -71,8 +71,13 @@ export const useTagsStore = defineStore('tags', {
       )
       return tags
     },
-    async delete(tag_id: bigint) {
-      const response = await fetch(URL + '/tags/' + tag_id, { method: 'DELETE' })
+    async delete(tag_id: bigint[] | bigint) {
+      console.log(tag_id)
+      if (Array.isArray(tag_id)) {
+        await Promise.allSettled(tag_id.map((value) => fetch(URL + '/tags/' + value, { method: 'DELETE'})))
+      } else {
+        await fetch(URL + '/tags/' + tag_id, { method: 'DELETE' })
+      }
       await this.refresh()
       const itemStore = useItemsStore()
       await itemStore.refresh()
