@@ -3,10 +3,15 @@ import ItemCreate from '../views/ItemCreate.vue'
 import ItemDetails from '../views/ItemDetails.vue'
 import ItemList from '../views/ItemList.vue'
 import TagList from '../views/TagList.vue'
+import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/",
+      component: HomeView
+    },
     {
       path: '/items',
       component: ItemList

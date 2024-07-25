@@ -9,6 +9,10 @@ const appSettings = useAppSettingsStore()
 
 const items: MenuItem[] = [
   {
+    label: "Home",
+    command: () => router.push('/')
+  },
+  {
     label: 'Items',
     command: () => router.push('/items')
   },

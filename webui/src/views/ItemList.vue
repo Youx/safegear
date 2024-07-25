@@ -2,7 +2,7 @@
 import ItemTable from '@/components/ItemTable.vue'
 </script>
 <template>
-  <div>
+  <div class="w-screen">
     <ItemTable />
   </div>
 </template>

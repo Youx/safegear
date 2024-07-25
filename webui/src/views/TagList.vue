@@ -16,8 +16,14 @@ const selectedTags = defineModel('selectedTags', { default: (): Tag[] => []})
 </script>
 
 <template>
-  <div>
-    <DataTable :value="store.tags" v-model:filters="filters.data" :globalFilterFields="['name']" v-model:selection="selectedTags"
+  <div class="w-screen">
+    <DataTable
+      :value="store.tags"
+      v-model:filters="filters.data"
+      :globalFilterFields="['name']"
+      v-model:selection="selectedTags"
+      :paginator="true"
+      :rows="20"
     >
       <template #header>
         <div class="flex overflow-hidden gap-3">
