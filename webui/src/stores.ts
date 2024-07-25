@@ -119,3 +119,18 @@ export const useAppSettingsStore = defineStore('appSettings', {
     }
   }
 })
+
+export const useAppInfoStore = defineStore('appInfo', {
+  state: () => ({
+    version: "",
+    changelog: "",
+  }),
+  actions: {
+    async refresh() {
+      const version = await fetch("/version.txt");
+      const changelog = await fetch("/CHANGELOG.md")
+      this.version = await version.text();
+      this.changelog = await changelog.text();
+    }
+  }
+})
