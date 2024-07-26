@@ -14,7 +14,8 @@ use diesel::Connection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 
 use api::{
-    item_create, item_details, item_list, r#static, tag_create, tag_delete, tag_list, Application,
+    item_create, item_details, item_list, r#static, tag_create, tag_delete, tag_list, user_list,
+    Application,
 };
 use db::create_pool;
 
@@ -79,6 +80,7 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
         .route("/api/tags", get(tag_list::handler))
         .route("/api/tags", post(tag_create::handler))
         .route("/api/tags/:id", delete(tag_delete::handler))
+        .route("/api/users", get(user_list::handler))
         .with_state(application);
 
     Ok(router.into())

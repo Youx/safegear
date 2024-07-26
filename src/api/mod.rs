@@ -9,6 +9,7 @@ pub mod r#static;
 pub mod tag_create;
 pub mod tag_delete;
 pub mod tag_list;
+pub mod user_list;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ApiError {
