@@ -1,6 +1,7 @@
 use axum::{http::StatusCode, response::IntoResponse};
+use jwt_simple::algorithms::HS256Key;
 
-use crate::db::DbPool;
+use crate::{db::DbPool, models::user::User};
 
 pub mod item_create;
 pub mod item_details;
@@ -10,6 +11,7 @@ pub mod tag_create;
 pub mod tag_delete;
 pub mod tag_list;
 pub mod user_list;
+pub mod user_login;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ApiError {
@@ -43,4 +45,28 @@ pub(super) type ApiResult<T> = Result<T, ApiError>;
 #[derive(Clone)]
 pub struct Application {
     pub database: DbPool,
+    pub jwt_secret: HS256Key,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct ApiClaims {
+    login: String,
+    perm_users: bool,
+    perm_tags: bool,
+    perm_items: bool,
+    perm_action_inspect: bool,
+    perm_action_lend: bool,
+}
+
+impl From<User> for ApiClaims {
+    fn from(value: User) -> Self {
+        Self {
+            login: value.login,
+            perm_users: value.perm_users,
+            perm_action_lend: value.perm_action_lend,
+            perm_action_inspect: value.perm_action_inspect,
+            perm_tags: value.perm_tags,
+            perm_items: value.perm_items,
+        }
+    }
 }

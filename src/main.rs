@@ -15,12 +15,13 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations};
 
 use api::{
     item_create, item_details, item_list, r#static, tag_create, tag_delete, tag_list, user_list,
-    Application,
+    user_login, Application,
 };
 use db::create_pool;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 use diesel_migrations::MigrationHarness;
+use jwt_simple::algorithms::HS256Key;
 use std::error::Error;
 
 #[cfg(debug_assertions)]
@@ -70,7 +71,12 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
         r#static::list_assets();
     }
 
-    let application = Application { database: db_pool };
+    let application = Application {
+        database: db_pool,
+        // Automatically generate a new key on startup,
+        // ensuring all users get logged out.
+        jwt_secret: HS256Key::generate(),
+    };
     let router = Router::new()
         .fallback(get(r#static::static_handler))
         .route("/", get(r#static::index_handler))
@@ -81,6 +87,7 @@ async fn main(#[shuttle_shared_db::Postgres] db_url: String) -> shuttle_axum::Sh
         .route("/api/tags", post(tag_create::handler))
         .route("/api/tags/:id", delete(tag_delete::handler))
         .route("/api/users", get(user_list::handler))
+        .route("/api/users/login", post(user_login::handler))
         .with_state(application);
 
     Ok(router.into())
