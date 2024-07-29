@@ -27,8 +27,6 @@ const itemStore = useItemsStore()
 const tagsStore = useTagsStore()
 const appInfoStore = useAppInfoStore()
 async function initStores() {
-  await itemStore.refresh()
-  await tagsStore.refresh()
   await appInfoStore.refresh()
 }
 initStores()

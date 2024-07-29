@@ -5,15 +5,19 @@ import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import FloatLabel from 'primevue/floatlabel';
 
-import { useAppSettingsStore } from '@/stores';
+import { useAppSettingsStore, useItemsStore, useTagsStore } from '@/stores';
 import { ref } from 'vue';
 
 const appSettings = useAppSettingsStore();
+const itemStore = useItemsStore();
+const tagStore = useTagsStore();
 const login = ref();
 const password = ref();
 
 async function submit() {
     await appSettings.login(login.value, password.value)
+    await itemStore.refresh();
+    await tagStore.refresh();
 }
 </script>
 <template>

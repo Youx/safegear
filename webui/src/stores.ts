@@ -7,6 +7,35 @@ import type { DataTableFilterMeta } from 'primevue/datatable'
 
 const URL = '/api'
 
+class Requester {
+  static async request<T>(url: string, method: 'POST' | 'GET' | 'DELETE' | 'PUT', data: T | undefined): Promise<Response> {
+    const appSettings = useAppSettingsStore();
+    const serializedData = data !== undefined ? JSON.stringify(data) : undefined;
+    const headers: {[id: string]: string} = {};
+    headers['Content-Type'] = 'application/json';
+    if (appSettings.jwtToken) {
+      headers['Authorization'] = 'Bearer ' + appSettings.jwtToken;
+    }
+    return await fetch(URL + url, {
+      method,
+      headers,
+      body: serializedData,
+    })
+  }
+  static async post<T, Y>(url: string, data: T): Promise<Y> {
+    const res: Y = JSON.parse(await (await Requester.request(url, 'POST', data)).text());
+    return res
+  }
+  static async get<Y>(url: string): Promise<Y> {
+    const res: Y = JSON.parse(await (await Requester.request(url, 'GET', undefined)).text())
+    return res
+  }
+  static async delete(url: string) {
+    await Requester.request(url, 'DELETE', undefined)
+  }
+
+}
+
 export const useItemsStore = defineStore('items', {
   state: () => ({
     items: [] as Item[]
@@ -19,30 +48,15 @@ export const useItemsStore = defineStore('items', {
   },
   actions: {
     async details(item_id: bigint): Promise<ItemDetails> {
-      const response = await fetch(URL + '/items/' + item_id, { method: 'GET' })
-      if (response.status !== 200) {
-        throw new Error('Failed to fetch item details: ' + response.statusText)
-      }
-      const item: ItemDetails = JSON.parse(await response.text())
-      return item
+      return await Requester.get('/items' + item_id)
     },
 
     async refresh() {
-      const response = await fetch(URL + '/items', { method: 'GET' })
-      const items: [Item] = JSON.parse(await response.text())
-      this.items = items
-      return items
+      this.items = await Requester.get('/items')
     },
 
-    async create(create_item: CreateItem) {
-      const response = await fetch(URL + '/items', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(create_item)
-      })
-      const item: Item = JSON.parse(await response.text())
+    async create(create_item: CreateItem): Promise<Item> {
+      const item: Item = await Requester.post('/items', create_item);
       this.refresh()
       return item
     }
@@ -59,8 +73,7 @@ export const useTagsStore = defineStore('tags', {
       )
     },
     async refresh() {
-      const response = await fetch(URL + '/tags', { method: 'GET' })
-      const tags: [Tag] = JSON.parse(await response.text())
+      const tags: Tag[] = await Requester.get('/tags');
       this.tags = tags
       this.byId = tags.reduce(
         function (map, obj: Tag) {
@@ -69,14 +82,12 @@ export const useTagsStore = defineStore('tags', {
         },
         {} as { [key: string]: Tag }
       )
-      return tags
     },
     async delete(tag_id: bigint[] | bigint) {
-      console.log(tag_id)
       if (Array.isArray(tag_id)) {
-        await Promise.allSettled(tag_id.map((value) => fetch(URL + '/tags/' + value, { method: 'DELETE'})))
+        await Promise.allSettled(tag_id.map((value) => Requester.delete('/tags/' + value )))
       } else {
-        await fetch(URL + '/tags/' + tag_id, { method: 'DELETE' })
+        await Requester.delete('/tags/' + tag_id)
       }
       await this.refresh()
       const itemStore = useItemsStore()
