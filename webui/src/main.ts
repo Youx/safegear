@@ -4,7 +4,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { useAppInfoStore, useItemsStore, useTagsStore } from './stores'
+import { useAppInfoStore } from './stores'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
@@ -23,8 +23,6 @@ const app = createApp(App)
     }
   })
 
-const itemStore = useItemsStore()
-const tagsStore = useTagsStore()
 const appInfoStore = useAppInfoStore()
 async function initStores() {
   await appInfoStore.refresh()

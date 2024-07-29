@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useItemSearchStore, useItemsStore, useTagsStore } from '@/stores'
+import { useAppSettingsStore, useItemSearchStore, useItemsStore, useTagsStore } from '@/stores'
 import DataTable, { type DataTableFilterMetaData } from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
@@ -13,6 +13,7 @@ const itemStore = useItemsStore()
 const tagStore = useTagsStore()
 const filters = useItemSearchStore()
 const selectedItems = defineModel('selectedItems')
+const appSettings = useAppSettingsStore()
 
 async function refresh() {
   await itemStore.refresh()
@@ -33,7 +34,7 @@ async function refresh() {
       <div class="flex overflow-hidden gap-3">
         <h2 class="flex-none flex align-items-left justify-content-left">Items</h2>
         <div class="flex-grow-1 align-items-center flex justify-content-left">
-          <Button icon="pi pi-plus" rounded raised @click="router.push('/items/new')"></Button>
+          <Button v-if="appSettings.canManageItems" icon="pi pi-plus" rounded raised @click="router.push('/items/new')"></Button>
         </div>
         <div class="flex-none flex align-items-center justify-content-center">
           <IconField>
@@ -77,6 +78,7 @@ async function refresh() {
             @click="router.push('/items/details/' + slotProps.data.id)"
           />
           <Button
+            v-if="appSettings.canManageItems"
             icon="pi pi-trash"
             rounded
             outlined

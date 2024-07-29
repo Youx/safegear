@@ -116,7 +116,7 @@ export const useTagSearchStore = defineStore('tagSearch', {
     } as DataTableFilterMeta
   })
 })
-
+import { jwtDecode } from 'jwt-decode'
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
     badLogin: false,
@@ -126,6 +126,27 @@ export const useAppSettingsStore = defineStore('appSettings', {
   getters: {
     textColor(): string {
       return $dt('text.color').value[this.darkMode ? 'dark' : 'light'].value
+    },
+    canManageTags(): boolean {
+      if (!this.jwtToken) {
+        return false
+      }
+      const payload = jwtDecode(this.jwtToken)
+      return (payload as any).perm_tags;
+    },
+    canManageItems(): boolean {
+      if (!this.jwtToken) {
+        return false
+      }
+      const payload = jwtDecode(this.jwtToken)
+      return (payload as any).perm_items;
+    },
+    canManageUsers(): boolean {
+      if (!this.jwtToken) {
+        return false
+      }
+      const payload = jwtDecode(this.jwtToken)
+      return (payload as any).perm_users;
     }
   },
   actions: {
