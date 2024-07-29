@@ -11,23 +11,26 @@ const appSettings = useAppSettingsStore()
 const items: MenuItem[] = [
   {
     label: "Home",
+    icon: 'pi pi-home',
     command: () => router.push('/')
   },
   {
     label: 'Items',
+    icon: 'pi pi-database',
     command: () => router.push('/items'),
     visible: () => !!appSettings.jwtToken,
   },
   {
     label: 'Tags',
+    icon: 'pi pi-tags',
     command: () => router.push('/tags'),
     visible: () => !!appSettings.jwtToken,
   }
 ]
 </script>
 <template>
-  <div class="flex md-12">
-    <div class="flex align-items-center gap-3 md-3 mr-8">
+  <div class="flex md-12 align-items-center justify-content-between flex-wrap">
+    <div class="flex align-items-center gap-3 mr-8">
       <svg
         height="32px"
         width="32px"
@@ -64,12 +67,18 @@ const items: MenuItem[] = [
       </svg>
       <h1>SafeGear</h1>
     </div>
-    <div class="flex md-9">
+    <div class="flex flex-grow-1">
       <Menubar :model="items">
-        <template #after><NightMode /></template>
+        <template #end>
+          <div class="flex items-center gap-2">
+            <NightMode />
+            <Button v-if="appSettings.jwtToken" severity="danger" icon="pi pi-sign-out" @click="appSettings.logout()" />
+          </div>
+        </template>
       </Menubar>
     </div>
-    <NightMode />
-    <Button v-if="appSettings.jwtToken" severity="danger" icon="pi pi-sign-out" @click="appSettings.logout()" />
+    <div>
+
+    </div>
   </div>
 </template>
