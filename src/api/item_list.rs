@@ -2,7 +2,7 @@ use axum::{extract::State, Json};
 use diesel::{BelongingToDsl as _, GroupedBy as _};
 use diesel_async::RunQueryDsl as _;
 
-use super::{ApiResult, Application};
+use super::{ApiResult, Application, AuthenticatedUser, NoPermission};
 use crate::{
     models::{item::Item as ItemModel, tag::ItemTag},
     schema,
@@ -42,7 +42,10 @@ impl From<(ItemModel, Vec<ItemTag>)> for Item {
     }
 }
 
-pub async fn handler(state: State<Application>) -> ApiResult<Json<Vec<Item>>> {
+pub async fn handler(
+    _auth: AuthenticatedUser<NoPermission>,
+    state: State<Application>,
+) -> ApiResult<Json<Vec<Item>>> {
     let mut conn = state.database.get().await?;
     let items = schema::items::table
         .get_results::<ItemModel>(&mut conn)

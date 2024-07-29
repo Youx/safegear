@@ -1,5 +1,21 @@
-use axum::{http::StatusCode, response::IntoResponse};
-use jwt_simple::algorithms::HS256Key;
+use std::marker::PhantomData;
+
+use axum::{
+    async_trait,
+    extract::{FromRef, FromRequestParts},
+    http::{request, StatusCode},
+    response::{IntoResponse, Response},
+    Json, RequestPartsExt as _,
+};
+use axum_extra::{
+    headers::{authorization::Bearer, Authorization},
+    TypedHeader,
+};
+use jwt_simple::{
+    algorithms::{HS256Key, MACLike},
+    claims::JWTClaims,
+};
+use serde_json::json;
 
 use crate::{db::DbPool, models::user::User};
 
@@ -70,3 +86,106 @@ impl From<User> for ApiClaims {
         }
     }
 }
+
+// error types for auth errors
+#[derive(Debug)]
+pub enum AuthError {
+    InvalidToken,
+    MissingPermission,
+}
+
+pub struct AuthenticatedUser<P: ClaimPermission> {
+    phantom: PhantomData<P>,
+}
+pub trait ClaimPermission {
+    fn check(claims: &ApiClaims) -> bool;
+}
+impl<P> TryFrom<JWTClaims<ApiClaims>> for AuthenticatedUser<P>
+where
+    P: ClaimPermission + Default,
+{
+    type Error = AuthError;
+
+    fn try_from(value: JWTClaims<ApiClaims>) -> Result<Self, Self::Error> {
+        if P::check(&value.custom) {
+            Ok(AuthenticatedUser {
+                phantom: PhantomData::default(),
+            })
+        } else {
+            Err(AuthError::MissingPermission)
+        }
+    }
+}
+
+#[async_trait]
+impl<S, P> FromRequestParts<S> for AuthenticatedUser<P>
+where
+    P: ClaimPermission + Default,
+    S: Send + Sync,
+    Application: FromRef<S>,
+    AuthenticatedUser<P>: TryFrom<JWTClaims<ApiClaims>, Error = AuthError>,
+{
+    type Rejection = AuthError;
+    async fn from_request_parts(
+        parts: &mut request::Parts,
+        state: &S,
+    ) -> Result<Self, Self::Rejection> {
+        let app = Application::from_ref(&state);
+        // Extract the token from the authorization header
+        let TypedHeader(Authorization(bearer)) = parts
+            .extract::<TypedHeader<Authorization<Bearer>>>()
+            .await
+            .map_err(|_| AuthError::InvalidToken)?;
+        // Decode the user data
+        let token_data: JWTClaims<ApiClaims> = app
+            .jwt_secret
+            .verify_token(bearer.token(), None)
+            .map_err(|_| AuthError::InvalidToken)?;
+
+        token_data.try_into()
+    }
+}
+
+impl IntoResponse for AuthError {
+    fn into_response(self) -> Response {
+        let (status, error_message) = match self {
+            AuthError::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token"),
+            AuthError::MissingPermission => (StatusCode::FORBIDDEN, "Missing permission"),
+        };
+        let body = Json(json!({
+            "error": error_message,
+        }));
+        (status, body).into_response()
+    }
+}
+
+macro_rules! permissions {
+    (NoPermission => true, $($t:ident => $field:ident),* $(,)?) => {
+        $(
+            #[derive(Default)]
+            pub struct $t;
+            impl $crate::api::ClaimPermission for $t {
+                fn check(c: &$crate::api::ApiClaims) -> bool {
+                    c.$field
+                }
+            }
+        )*
+
+        #[derive(Default)]
+        pub struct NoPermission;
+        impl $crate::api::ClaimPermission for NoPermission {
+            fn check(_c: &$crate::api::ApiClaims) -> bool {
+                true
+            }
+        }
+    };
+}
+
+permissions!(
+    NoPermission => true,
+    ManageItems => perm_items,
+    ManageUsers => perm_users,
+    ManageTags => perm_tags,
+    LendItems => perm_action_lend,
+    InspectItems => perm_action_inspect
+);

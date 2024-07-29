@@ -1,7 +1,7 @@
 use axum::{extract::State, Json};
 use diesel_async::RunQueryDsl as _;
 
-use super::{ApiResult, Application};
+use super::{ApiResult, Application, AuthenticatedUser, ManageUsers};
 use crate::{models::user::User as UserModel, schema};
 
 #[derive(schemars::JsonSchema, serde::Serialize, ts_rs::TS)]
@@ -40,7 +40,10 @@ impl From<UserModel> for UserWithPermissions {
     }
 }
 
-pub async fn handler(state: State<Application>) -> ApiResult<Json<Vec<UserWithPermissions>>> {
+pub async fn handler(
+    _auth: AuthenticatedUser<ManageUsers>,
+    state: State<Application>,
+) -> ApiResult<Json<Vec<UserWithPermissions>>> {
     let mut conn = state.database.get().await?;
     let users = schema::users::table
         .get_results::<UserModel>(&mut conn)

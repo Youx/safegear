@@ -1,7 +1,7 @@
 use axum::{extract::State, Json};
 use diesel_async::RunQueryDsl as _;
 
-use super::{ApiResult, Application};
+use super::{ApiResult, Application, AuthenticatedUser, NoPermission};
 use crate::{models::tag::Tag as TagModel, schema};
 
 #[derive(schemars::JsonSchema, serde::Serialize, ts_rs::TS)]
@@ -25,7 +25,10 @@ impl From<TagModel> for Tag {
     }
 }
 
-pub async fn handler(state: State<Application>) -> ApiResult<Json<Vec<Tag>>> {
+pub async fn handler(
+    _auth: AuthenticatedUser<NoPermission>,
+    state: State<Application>,
+) -> ApiResult<Json<Vec<Tag>>> {
     let mut conn = state.database.get().await?;
     let tags = schema::tags::table
         .get_results::<TagModel>(&mut conn)

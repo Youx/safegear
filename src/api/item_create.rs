@@ -10,7 +10,7 @@ use crate::{
     schema::*,
 };
 
-use super::{item_list::Item, ApiResult, Application};
+use super::{item_list::Item, ApiResult, Application, AuthenticatedUser, ManageItems};
 
 #[derive(serde::Deserialize, schemars::JsonSchema, ts_rs::TS)]
 #[ts(export)]
@@ -22,6 +22,7 @@ pub struct CreateItem {
 }
 
 pub async fn handler(
+    _auth: AuthenticatedUser<ManageItems>,
     state: State<Application>,
     Json(data): Json<CreateItem>,
 ) -> ApiResult<Json<Item>> {

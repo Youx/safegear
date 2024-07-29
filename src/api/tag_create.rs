@@ -6,7 +6,7 @@ use crate::{
     schema::tags,
 };
 
-use super::{tag_list::Tag, ApiResult, Application};
+use super::{tag_list::Tag, ApiResult, Application, AuthenticatedUser, ManageTags};
 
 #[derive(serde::Deserialize, schemars::JsonSchema, ts_rs::TS)]
 #[ts(export)]
@@ -18,6 +18,7 @@ pub struct CreateTag {
 }
 
 pub async fn handler(
+    _auth: AuthenticatedUser<ManageTags>,
     state: State<Application>,
     Json(data): Json<CreateTag>,
 ) -> ApiResult<Json<Tag>> {

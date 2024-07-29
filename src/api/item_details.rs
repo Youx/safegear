@@ -6,7 +6,7 @@ use chrono::Utc;
 use diesel::{BelongingToDsl as _, ExpressionMethods as _, QueryDsl as _};
 use diesel_async::RunQueryDsl as _;
 
-use super::{ApiResult, Application};
+use super::{ApiResult, Application, AuthenticatedUser, NoPermission};
 use crate::{
     models::{event::Event, item::Item as ItemModel, tag::ItemTag},
     schema::*,
@@ -68,6 +68,7 @@ impl From<(ItemModel, Vec<ItemTag>, Vec<Event>)> for ItemDetails {
 }
 
 pub async fn handler(
+    _auth: AuthenticatedUser<NoPermission>,
     state: State<Application>,
     Path(item_id): Path<i64>,
 ) -> ApiResult<Json<ItemDetails>> {
