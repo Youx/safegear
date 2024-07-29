@@ -28,3 +28,6 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+src/bindings
+public/CHANGELOG.md
+public/version.txt
