@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MenuItem } from 'primevue/menuitem'
 import Menubar from 'primevue/menubar'
+import Button from 'primevue/button'
 import NightMode from '@/components/NightMode.vue'
 import router from '@/router'
 import { useAppSettingsStore } from '@/stores'
@@ -14,11 +15,13 @@ const items: MenuItem[] = [
   },
   {
     label: 'Items',
-    command: () => router.push('/items')
+    command: () => router.push('/items'),
+    visible: () => !!appSettings.jwtToken,
   },
   {
     label: 'Tags',
-    command: () => router.push('/tags')
+    command: () => router.push('/tags'),
+    visible: () => !!appSettings.jwtToken,
   }
 ]
 </script>
@@ -67,5 +70,6 @@ const items: MenuItem[] = [
       </Menubar>
     </div>
     <NightMode />
+    <Button v-if="appSettings.jwtToken" severity="danger" icon="pi pi-sign-out" @click="appSettings.logout()" />
   </div>
 </template>

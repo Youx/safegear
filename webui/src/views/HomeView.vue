@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAppInfoStore } from '../stores';
 import Changelog from '../../public/CHANGELOG.md'
 import Panel from 'primevue/panel';
 import ScrollPanel from 'primevue/scrollpanel';

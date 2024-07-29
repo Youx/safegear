@@ -87,6 +87,9 @@ export const useTagsStore = defineStore('tags', {
 
 import { FilterMatchMode } from '@primevue/core/api'
 import { $dt } from '@primevue/themes'
+import type { UserToken } from './bindings/UserToken'
+import type { LoginUser } from './bindings/LoginUser'
+
 export const useItemSearchStore = defineStore('itemSearch', {
   state: () => ({
     data: {
@@ -105,6 +108,8 @@ export const useTagSearchStore = defineStore('tagSearch', {
 
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
+    badLogin: false,
+    jwtToken: null as string | null,
     darkMode: document.querySelector('html')?.classList.contains('my-app-dark')
   }),
   getters: {
@@ -113,6 +118,32 @@ export const useAppSettingsStore = defineStore('appSettings', {
     }
   },
   actions: {
+    logout() {
+      this.jwtToken = null
+    },
+    async login(login: string, password: string) {
+      this.badLogin = false;
+      const query: LoginUser = {
+        login,
+        password,
+      };
+      if (this.jwtToken) {
+        throw new Error("JWT Token is already set, this should not happen")
+      }
+      const response = await fetch(URL + '/users/login', {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(query),
+        method: 'POST'
+      });
+      if (response.status !== 200) {
+        this.badLogin = true;
+      } else {
+        const body: UserToken = await response.json()
+        this.jwtToken = body.jwt_token;
+      }
+    },
     toggle() {
       this.darkMode = !this.darkMode
       document.querySelector('html')?.classList.toggle('my-app-dark')

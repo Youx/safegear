@@ -4,6 +4,8 @@ import ItemDetails from '../views/ItemDetails.vue'
 import ItemList from '../views/ItemList.vue'
 import TagList from '../views/TagList.vue'
 import HomeView from '../views/HomeView.vue'
+import LoginView from '../views/LoginView.vue'
+
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
