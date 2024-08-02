@@ -7,9 +7,11 @@ import { createPinia } from 'pinia'
 import { useAppInfoStore } from './stores'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
+import Tooltip from 'primevue/tooltip';
 
 import App from './App.vue'
 import router from './router'
+
 
 const app = createApp(App)
   .use(createPinia())
@@ -22,6 +24,8 @@ const app = createApp(App)
       }
     }
   })
+  .directive('tooltip', Tooltip);
+
 
 const appInfoStore = useAppInfoStore()
 async function initStores() {

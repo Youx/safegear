@@ -25,6 +25,12 @@ const items: MenuItem[] = [
     icon: 'pi pi-tags',
     command: () => router.push('/tags'),
     visible: () => !!appSettings.jwtToken && appSettings.canManageTags,
+  },
+  {
+    label: 'Users',
+    icon: 'pi pi-users',
+    command: () => router.push('/users'),
+    visible: () => !!appSettings.jwtToken && appSettings.canManageTags,
   }
 ]
 </script>

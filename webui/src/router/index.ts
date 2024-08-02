@@ -4,7 +4,7 @@ import ItemDetails from '../views/ItemDetails.vue'
 import ItemList from '../views/ItemList.vue'
 import TagList from '../views/TagList.vue'
 import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
+import UserList from '../views/UserList.vue'
 
 
 const router = createRouter({
@@ -29,6 +29,10 @@ const router = createRouter({
     {
       path: '/tags',
       component: TagList
+    },
+    {
+      path: '/users',
+      component: UserList
     }
   ]
 })

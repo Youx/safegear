@@ -117,6 +117,7 @@ export const useTagSearchStore = defineStore('tagSearch', {
   })
 })
 import { jwtDecode } from 'jwt-decode'
+import type { UserWithPermissions } from './bindings/UserWithPermissions'
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
     badLogin: false,
@@ -191,6 +192,23 @@ export const useAppInfoStore = defineStore('appInfo', {
     async refresh() {
       const version = await fetch("/version.txt");
       this.version = await version.text();
+    }
+  }
+})
+
+export const useUsersStore = defineStore('users', {
+  state: () => ({
+    users: [] as UserWithPermissions[],
+    filters: {
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    } as DataTableFilterMeta
+  }),
+  actions: {
+    async refresh() {
+      this.users = await Requester.get('/users')
+    },
+    async delete(tag_id: bigint[] | bigint) {
+      console.log("TODO: delete users")
     }
   }
 })
