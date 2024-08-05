@@ -69,7 +69,7 @@ export const useTagsStore = defineStore('tags', {
   actions: {
     getTag(tagId: bigint): Tag {
       return (
-        this.byId[tagId as unknown as string] ?? { id: -1, color: '#ffffff', name: 'undefined' }
+        this.byId[tagId as unknown as string] ?? { id: -1, name: 'undefined' }
       )
     },
     async refresh() {

@@ -44,7 +44,6 @@ store.refresh()
       <Column selectionMode="multiple"></Column>
       <Column field="id" header="#" />
       <Column field="name" header="Name" />
-      <Column field="color" header="Color" />
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-1">
