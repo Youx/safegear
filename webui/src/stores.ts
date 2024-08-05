@@ -212,8 +212,13 @@ export const useUsersStore = defineStore('users', {
     async refresh() {
       this.users = await Requester.get('/users')
     },
-    async delete(tag_id: bigint[] | bigint) {
-      console.log("TODO: delete users")
+    async delete(user_id: bigint[] | bigint) {
+      if (Array.isArray(user_id)) {
+        await Promise.allSettled(user_id.map((value) => Requester.delete('/users/' + value )))
+      } else {
+        await Requester.delete('/users/' + user_id)
+      }
+      await this.refresh()
     }
   }
 })
