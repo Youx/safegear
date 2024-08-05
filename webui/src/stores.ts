@@ -116,12 +116,15 @@ export const useTagSearchStore = defineStore('tagSearch', {
     } as DataTableFilterMeta
   })
 })
+
 import { jwtDecode } from 'jwt-decode'
 import type { UserWithPermissions } from './bindings/UserWithPermissions'
+import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
+
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
     badLogin: false,
-    jwtToken: null as string | null,
+    jwtToken: getCookie('JWT_TOKEN') as string | undefined,
     darkMode: document.querySelector('html')?.classList.contains('my-app-dark')
   }),
   getters: {
@@ -152,7 +155,8 @@ export const useAppSettingsStore = defineStore('appSettings', {
   },
   actions: {
     logout() {
-      this.jwtToken = null
+      removeCookie('JWT_TOKEN')
+      this.jwtToken = undefined
     },
     async login(login: string, password: string) {
       this.badLogin = false;
@@ -175,6 +179,7 @@ export const useAppSettingsStore = defineStore('appSettings', {
       } else {
         const body: UserToken = await response.json()
         this.jwtToken = body.jwt_token;
+        setCookie('JWT_TOKEN', this.jwtToken, { sameSite: 'strict' })
       }
     },
     toggle() {

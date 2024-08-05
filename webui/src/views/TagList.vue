@@ -11,45 +11,29 @@ import router from '@/router'
 
 let store = useTagsStore()
 const filters = useTagSearchStore()
-const selectedTags = defineModel('selectedTags', { default: (): Tag[] => []})
-
+const selectedTags = defineModel('selectedTags', { default: (): Tag[] => [] })
+store.refresh()
 </script>
 
 <template>
   <div class="w-screen">
-    <DataTable
-      :value="store.tags"
-      v-model:filters="filters.data"
-      :globalFilterFields="['name']"
-      v-model:selection="selectedTags"
-      :paginator="true"
-      :rows="20"
-    >
+    <DataTable :value="store.tags" v-model:filters="filters.data" :globalFilterFields="['name']"
+      v-model:selection="selectedTags" :paginator="true" :rows="20">
       <template #header>
         <div class="flex overflow-hidden gap-3">
           <h2 class="flex-none flex align-items-left justify-content-left">Tags</h2>
           <div class="flex-grow-1 gap-1 align-items-center flex justify-content-left">
             <Button icon="pi pi-plus" rounded raised @click="router.push('/items/new')"></Button>
-            <Button
-              icon="pi pi-trash"
-              rounded
-              outlined
-              :disabled="selectedTags.length == 0"
-              severity="danger"
-              size="small"
-              aria-label="Delete"
-              @click="store.delete(selectedTags.map((t) => t.id))"
-            />
+            <Button icon="pi pi-trash" rounded outlined :disabled="selectedTags.length == 0" severity="danger"
+              size="small" aria-label="Delete" @click="store.delete(selectedTags.map((t) => t.id))" />
           </div>
           <div class="flex-none flex align-items-center justify-content-center">
             <IconField>
               <InputIcon>
                 <i class="pi pi-search" />
               </InputIcon>
-              <InputText
-                v-model="(filters.data['global'] as DataTableFilterMetaData).value"
-                placeholder="Keyword Search"
-              />
+              <InputText v-model="(filters.data['global'] as DataTableFilterMetaData).value"
+                placeholder="Keyword Search" />
             </IconField>
           </div>
           <div class="flex-none flex align-items-center justify-content-center">
@@ -64,15 +48,8 @@ const selectedTags = defineModel('selectedTags', { default: (): Tag[] => []})
       <Column header="Actions">
         <template #body="slotProps">
           <div class="flex gap-1">
-            <Button
-              icon="pi pi-trash"
-              rounded
-              outlined
-              severity="danger"
-              size="small"
-              aria-label="Delete"
-              @click="store.delete(slotProps.data.id)"
-            />
+            <Button icon="pi pi-trash" rounded outlined severity="danger" size="small" aria-label="Delete"
+              @click="store.delete(slotProps.data.id)" />
           </div>
         </template>
       </Column>
