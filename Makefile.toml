@@ -1,0 +1,25 @@
+[tasks.generate-bindings]
+command = "cargo"
+args = ["test"]
+env = { "TS_RS_EXPORT_DIR" = "webui/src/bindings" }
+
+[tasks.build-backend]
+command = "cargo"
+args = ["build"]
+
+[tasks.build-frontend]
+command = "npm"
+args = ["run", "build"]
+cwd = "webui"
+
+[tasks.run]
+command = "cargo"
+args = ["shuttle", "run"]
+
+[tasks.workflow]
+dependencies = [
+    "generate-bindings",
+    "build-frontend",
+    "build-backend",
+    "run",
+]
