@@ -26,6 +26,7 @@ pub mod r#static;
 pub mod tag_create;
 pub mod tag_delete;
 pub mod tag_list;
+pub mod user_delete;
 pub mod user_list;
 pub mod user_login;
 
@@ -35,6 +36,8 @@ pub enum ApiError {
     Database(#[from] diesel::result::Error),
     #[error("Pool error: {0}")]
     Pool(#[from] diesel_async::pooled_connection::deadpool::PoolError),
+    #[error("Cannot delete yourself")]
+    CannotDeleteSelf,
 }
 
 impl IntoResponse for ApiError {
@@ -51,6 +54,9 @@ impl IntoResponse for ApiError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Pool error: {e}"),
             ),
+            ApiError::CannotDeleteSelf => {
+                (StatusCode::BAD_REQUEST, format!("Cannot delete yourself"))
+            }
         }
         .into_response()
     }
@@ -95,6 +101,7 @@ pub enum AuthError {
 }
 
 pub struct AuthenticatedUser<P: ClaimPermission> {
+    claims: ApiClaims,
     phantom: PhantomData<P>,
 }
 pub trait ClaimPermission {
@@ -109,6 +116,7 @@ where
     fn try_from(value: JWTClaims<ApiClaims>) -> Result<Self, Self::Error> {
         if P::check(&value.custom) {
             Ok(AuthenticatedUser {
+                claims: value.custom,
                 phantom: PhantomData::default(),
             })
         } else {
