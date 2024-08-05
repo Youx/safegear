@@ -11,8 +11,6 @@ pub struct Tag {
     id: i64,
     /// Name of the tag
     name: String,
-    /// Color of the tag
-    color: String,
 }
 
 impl From<TagModel> for Tag {
@@ -20,7 +18,6 @@ impl From<TagModel> for Tag {
         Self {
             id: value.id,
             name: value.name,
-            color: value.color,
         }
     }
 }

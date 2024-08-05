@@ -13,8 +13,6 @@ use super::{tag_list::Tag, ApiResult, Application, AuthenticatedUser, ManageTags
 pub struct CreateTag {
     /// Name of the tag to create
     name: String,
-    /// Color of the tag
-    color: String,
 }
 
 pub async fn handler(
@@ -24,10 +22,7 @@ pub async fn handler(
 ) -> ApiResult<Json<Tag>> {
     let mut conn = state.database.get().await?;
     let tag = diesel::insert_into(tags::table)
-        .values(InsertTagModel {
-            name: data.name,
-            color: data.color,
-        })
+        .values(InsertTagModel { name: data.name })
         .returning(tags::all_columns)
         .get_result::<TagModel>(&mut conn)
         .await?;

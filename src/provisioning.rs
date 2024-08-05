@@ -9,13 +9,13 @@ use crate::{
     schema::*,
 };
 
-// id, name, color
-const TAGS: &[(i64, &'static str, &'static str)] = &[
-    (0, "Corde simple", "#cc99ff"),
-    (1, "Corde double", "#ccff99"),
-    (2, "Système d'assurage", "#ffcc99"),
-    (3, "Sangle", "#99ffcc"),
-    (4, "Friend", "#ff99cc"),
+// id, name
+const TAGS: &[(i64, &'static str)] = &[
+    (0, "Corde simple"),
+    (1, "Corde double"),
+    (2, "Système d'assurage"),
+    (3, "Sangle"),
+    (4, "Friend"),
 ];
 
 // id, name, inspection period days, tags
@@ -94,7 +94,6 @@ pub(crate) async fn provision(
             TAGS.iter()
                 .map(|tag| InsertTag {
                     name: tag.1.to_owned(),
-                    color: tag.2.to_owned(),
                 })
                 .collect::<Vec<_>>(),
         )

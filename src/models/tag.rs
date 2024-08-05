@@ -8,14 +8,12 @@ use super::item::Item;
 pub struct Tag {
     pub id: i64,
     pub name: String,
-    pub color: String,
 }
 
 #[derive(Insertable)]
 #[diesel(table_name = tags)]
 pub struct InsertTag {
     pub name: String,
-    pub color: String,
 }
 
 #[derive(Identifiable, Queryable, Associations)]

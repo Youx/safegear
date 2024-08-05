@@ -31,7 +31,6 @@ diesel::table! {
     tags (id) {
         id -> Int8,
         name -> Varchar,
-        color -> Varchar,
     }
 }
 
@@ -53,10 +52,4 @@ diesel::joinable!(events -> items (item_id));
 diesel::joinable!(items_tags -> items (item_id));
 diesel::joinable!(items_tags -> tags (tag_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    events,
-    items,
-    items_tags,
-    tags,
-    users,
-);
+diesel::allow_tables_to_appear_in_same_query!(events, items, items_tags, tags, users,);
