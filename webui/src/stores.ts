@@ -120,6 +120,7 @@ export const useTagSearchStore = defineStore('tagSearch', {
 import { jwtDecode } from 'jwt-decode'
 import type { UserWithPermissions } from './bindings/UserWithPermissions'
 import { getCookie, setCookie, removeCookie } from 'typescript-cookie'
+import type { CreateUser } from './bindings/CreateUser'
 
 export const useAppSettingsStore = defineStore('appSettings', {
   state: () => ({
@@ -211,6 +212,11 @@ export const useUsersStore = defineStore('users', {
   actions: {
     async refresh() {
       this.users = await Requester.get('/users')
+    },
+    async create(create_user: CreateUser): Promise<UserWithPermissions> {
+      const user: UserWithPermissions = await Requester.post('/users', create_user)
+      this.refresh()
+      return user
     },
     async delete(user_id: bigint[] | bigint) {
       if (Array.isArray(user_id)) {

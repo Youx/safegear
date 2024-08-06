@@ -5,6 +5,7 @@ import ItemList from '../views/ItemList.vue'
 import TagList from '../views/TagList.vue'
 import HomeView from '../views/HomeView.vue'
 import UserList from '../views/UserList.vue'
+import UserCreate from '@/views/UserCreate.vue'
 
 
 const router = createRouter({
@@ -33,6 +34,10 @@ const router = createRouter({
     {
       path: '/users',
       component: UserList
+    },
+    {
+      path: '/users/new',
+      component: UserCreate
     }
   ]
 })
