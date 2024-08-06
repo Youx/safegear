@@ -16,6 +16,7 @@ use jwt_simple::{
     claims::JWTClaims,
 };
 use serde_json::json;
+use tokio::task::JoinError;
 
 use crate::{db::DbPool, models::user::User};
 
@@ -26,6 +27,7 @@ pub mod r#static;
 pub mod tag_create;
 pub mod tag_delete;
 pub mod tag_list;
+pub mod user_create;
 pub mod user_delete;
 pub mod user_list;
 pub mod user_login;
@@ -38,25 +40,24 @@ pub enum ApiError {
     Pool(#[from] diesel_async::pooled_connection::deadpool::PoolError),
     #[error("Cannot delete yourself")]
     CannotDeleteSelf,
+    #[error("Error hashing password: {0}")]
+    PasswordHash(String),
+    #[error("Error joining task: {0}")]
+    JoinError(#[from] JoinError),
 }
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
+        let message = self.to_string();
         match self {
             ApiError::Database(diesel::result::Error::NotFound) => {
                 (StatusCode::NOT_FOUND, format!("Unknown element"))
             }
-            ApiError::Database(e) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Database error: {e}"),
-            ),
-            ApiError::Pool(e) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Pool error: {e}"),
-            ),
-            ApiError::CannotDeleteSelf => {
-                (StatusCode::BAD_REQUEST, format!("Cannot delete yourself"))
-            }
+            ApiError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+            ApiError::Pool(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+            ApiError::CannotDeleteSelf => (StatusCode::BAD_REQUEST, message),
+            ApiError::PasswordHash(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+            ApiError::JoinError(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
         }
         .into_response()
     }
