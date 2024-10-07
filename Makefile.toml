@@ -16,9 +16,19 @@ cwd = "webui"
 command = "cargo"
 args = ["shuttle", "run"]
 
+[tasks.generate-changelog]
+command = "git"
+args = ["cliff", "-o", "webui/public/CHANGELOG.md"]
+
+[tasks.generate-version]
+script = "git describe > webui/public/version.txt"
+
+
 [tasks.workflow]
 dependencies = [
     "generate-bindings",
+    "generate-changelog",
+    "generate-version",
     "build-frontend",
     "build-backend",
     "run",
