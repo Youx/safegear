@@ -18,10 +18,14 @@ use jwt_simple::{
 use serde_json::json;
 use tokio::task::JoinError;
 
-use crate::{db::DbPool, models::user::User};
+use crate::{
+    db::DbPool,
+    models::{event, user::User},
+};
 
 pub mod item_create;
 pub mod item_details;
+pub mod item_inspect;
 pub mod item_list;
 pub mod r#static;
 pub mod tag_create;
@@ -44,6 +48,8 @@ pub enum ApiError {
     PasswordHash(String),
     #[error("Error joining task: {0}")]
     JoinError(#[from] JoinError),
+    #[error("Error creating event: {0}")]
+    EventCreation(event::Error),
 }
 
 impl IntoResponse for ApiError {
@@ -58,6 +64,7 @@ impl IntoResponse for ApiError {
             ApiError::CannotDeleteSelf => (StatusCode::BAD_REQUEST, message),
             ApiError::PasswordHash(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
             ApiError::JoinError(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
+            ApiError::EventCreation(_) => (StatusCode::BAD_REQUEST, message),
         }
         .into_response()
     }

@@ -1,3 +1,4 @@
+use chrono::Utc;
 use diesel::{
     expression::AsExpression, pg::Pg, sql_types::Jsonb, Associations, ExpressionMethods as _,
     Identifiable, Insertable, QueryDsl as _, Queryable, Selectable,
@@ -5,7 +6,7 @@ use diesel::{
 use diesel_async::{scoped_futures::ScopedFutureExt as _, AsyncConnection as _, RunQueryDsl as _};
 use serde::{Deserialize, Serialize};
 
-use crate::{models::item::Item, schema::*};
+use crate::{api::ApiError, models::item::Item, schema::*};
 
 #[derive(Insertable)]
 #[diesel(table_name = events)]
@@ -39,11 +40,22 @@ pub enum Error {
     Duplicate,
 }
 
+impl From<Error> for ApiError {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::ParentEventMissing => ApiError::EventCreation(value),
+            Error::Database(e) => ApiError::Database(e),
+            Error::InvalidParentKind => ApiError::EventCreation(value),
+            Error::Duplicate => ApiError::EventCreation(value),
+        }
+    }
+}
+
 impl Event {
     pub async fn insert_event(
         conn: &mut diesel_async::AsyncPgConnection,
         item_id: i64,
-        ts: chrono::NaiveDateTime,
+        ts: chrono::DateTime<Utc>,
         data: EventData,
     ) -> Result<Event, Error> {
         if data.parent_discriminant().is_some() {
@@ -66,7 +78,7 @@ impl Event {
                 Ok(InsertEvent {
                     item_id,
                     parent_id: None,
-                    ts,
+                    ts: ts.naive_utc(),
                     data,
                 }
                 .insert_into(events::table)
@@ -82,7 +94,7 @@ impl Event {
     pub async fn insert_sub_event(
         conn: &mut diesel_async::AsyncPgConnection,
         parent_id: i64,
-        ts: chrono::NaiveDateTime,
+        ts: chrono::DateTime<Utc>,
         data: EventData,
     ) -> Result<Event, Error> {
         conn.transaction(|conn| {
@@ -107,7 +119,7 @@ impl Event {
                 Ok(InsertEvent {
                     item_id: parent_event.item_id,
                     parent_id: Some(parent_id),
-                    ts,
+                    ts: ts.naive_utc(),
                     data,
                 }
                 .insert_into(events::table)
