@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::{
     expression::AsExpression, pg::Pg, sql_types::Jsonb, Associations, ExpressionMethods as _,
-    Identifiable, Insertable, QueryDsl as _, Queryable, Selectable,
+    Identifiable, Insertable, OptionalExtension as _, QueryDsl as _, Queryable, Selectable,
 };
 use diesel_async::{scoped_futures::ScopedFutureExt as _, AsyncConnection as _, RunQueryDsl as _};
 use serde::{Deserialize, Serialize};
@@ -12,43 +12,17 @@ use crate::{api::ApiError, models::item::Item, schema::*};
 #[diesel(table_name = events)]
 struct InsertEvent {
     item_id: i64,
-    parent_id: Option<i64>,
     ts: chrono::NaiveDateTime,
     data: EventData,
 }
 
 #[derive(Selectable, Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(Item))]
-#[diesel(belongs_to(Event, foreign_key = parent_id))]
 pub struct Event {
     pub id: i64,
     item_id: i64,
-    parent_id: Option<i64>,
     pub ts: chrono::NaiveDateTime,
     pub data: EventData,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Parent event is missing")]
-    ParentEventMissing,
-    #[error(transparent)]
-    Database(#[from] diesel::result::Error),
-    #[error("Invalid parent kind")]
-    InvalidParentKind,
-    #[error("Event already exists for this item")]
-    Duplicate,
-}
-
-impl From<Error> for ApiError {
-    fn from(value: Error) -> Self {
-        match value {
-            Error::ParentEventMissing => ApiError::EventCreation(value),
-            Error::Database(e) => ApiError::Database(e),
-            Error::InvalidParentKind => ApiError::EventCreation(value),
-            Error::Duplicate => ApiError::EventCreation(value),
-        }
-    }
 }
 
 impl Event {
@@ -57,75 +31,41 @@ impl Event {
         item_id: i64,
         ts: chrono::DateTime<Utc>,
         data: EventData,
-    ) -> Result<Event, Error> {
-        if data.parent_discriminant().is_some() {
-            return Err(Error::ParentEventMissing);
-        }
+    ) -> Result<Event, ApiError> {
         conn.transaction(|conn| {
             async {
-                if data.is_unique() {
-                    let events: Vec<Self> = events::table
-                        .filter(events::item_id.eq(item_id))
-                        .get_results(conn)
-                        .await?;
-                    if events
-                        .iter()
-                        .any(|event| event.data.discriminant() == data.discriminant())
-                    {
-                        return Err(Error::Duplicate);
-                    }
-                }
-                Ok(InsertEvent {
-                    item_id,
-                    parent_id: None,
-                    ts: ts.naive_utc(),
-                    data,
-                }
-                .insert_into(events::table)
-                .returning(events::all_columns)
-                .get_result(conn)
-                .await?)
-            }
-            .scope_boxed()
-        })
-        .await
-    }
+                let last_event: Option<Self> = events::table
+                    .filter(events::item_id.eq(item_id))
+                    .order_by(events::ts.desc())
+                    .limit(1)
+                    .get_result(conn)
+                    .await
+                    .optional()?;
 
-    pub async fn insert_sub_event(
-        conn: &mut diesel_async::AsyncPgConnection,
-        parent_id: i64,
-        ts: chrono::DateTime<Utc>,
-        data: EventData,
-    ) -> Result<Event, Error> {
-        conn.transaction(|conn| {
-            async {
-                let parent_event: Event = events::table.find(parent_id).get_result(conn).await?;
-                if Some(parent_event.data.discriminant()) != data.parent_discriminant() {
-                    return Err(Error::InvalidParentKind);
-                }
-                if data.is_unique() {
-                    let events: Vec<Self> = events::table
-                        .filter(events::item_id.eq(parent_event.item_id))
-                        .get_results(conn)
-                        .await?;
-                    if events
-                        .iter()
-                        .any(|event| event.data.discriminant() == data.discriminant())
-                    {
-                        return Err(Error::Duplicate);
+                // only allow specific event successions
+                // (ex: can only lose or return an item, after a borrow)
+                if !EventData::check_transition(
+                    match &last_event {
+                        Some(ref value) => Some(&value.data),
+                        None => None,
+                    },
+                    &data,
+                ) {
+                    Err(ApiError::InvalidTransition(
+                        last_event.map(|event| event.data),
+                        data,
+                    ))
+                } else {
+                    Ok(InsertEvent {
+                        item_id,
+                        ts: ts.naive_utc(),
+                        data,
                     }
+                    .insert_into(events::table)
+                    .returning(events::all_columns)
+                    .get_result(conn)
+                    .await?)
                 }
-
-                Ok(InsertEvent {
-                    item_id: parent_event.item_id,
-                    parent_id: Some(parent_id),
-                    ts: ts.naive_utc(),
-                    data,
-                }
-                .insert_into(events::table)
-                .returning(events::all_columns)
-                .get_result(conn)
-                .await?)
             }
             .scope_boxed()
         })
@@ -181,38 +121,108 @@ pub enum EventData {
 }
 diesel_json!(EventData);
 
+#[derive(Default)]
+pub(crate) struct Transition {
+    manufactured: bool,
+    put_into_service: bool,
+    inspected: bool,
+    borrowed: bool,
+    returned: bool,
+    retired: bool,
+    lost: bool,
+}
+impl Transition {
+    fn get_value(&self, event: &EventData) -> bool {
+        match event {
+            EventData::Manufactured {} => self.manufactured,
+            EventData::PutIntoService {} => self.put_into_service,
+            EventData::Inspected { .. } => self.inspected,
+            EventData::Borrowed { .. } => self.borrowed,
+            EventData::Returned { .. } => self.returned,
+            EventData::Retired {} => self.retired,
+            EventData::Lost {} => self.lost,
+        }
+    }
+}
+
 impl EventData {
-    /// Indicates if this event can happen only once.
-    pub(crate) fn is_unique(&self) -> bool {
-        match self {
-            EventData::Manufactured {} => true,
-            EventData::PutIntoService {} => true,
-            EventData::Inspected { .. } => false,
-            EventData::Borrowed { .. } => false,
-            EventData::Returned { .. } => false,
-            EventData::Retired {} => true,
-            EventData::Lost {} => true,
+    fn get_transition(last_event: Option<&Self>) -> Transition {
+        match last_event {
+            None => Transition {
+                manufactured: true,
+                put_into_service: false,
+                inspected: false,
+                borrowed: false,
+                returned: false,
+                retired: false,
+                lost: false,
+            },
+            Some(EventData::Manufactured {}) => Transition {
+                manufactured: false,
+                put_into_service: true,
+                inspected: false,
+                borrowed: false,
+                returned: false,
+                retired: true,
+                lost: true,
+            },
+            Some(EventData::PutIntoService {}) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: true,
+                borrowed: true,
+                returned: false,
+                retired: true,
+                lost: true,
+            },
+            Some(EventData::Inspected { .. }) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: true,
+                borrowed: true,
+                returned: false,
+                retired: true,
+                lost: true,
+            },
+            Some(EventData::Borrowed { .. }) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: false,
+                borrowed: false,
+                returned: true,
+                retired: false,
+                lost: true,
+            },
+            Some(EventData::Returned { .. }) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: true,
+                borrowed: true,
+                returned: false,
+                retired: true,
+                lost: true,
+            },
+            Some(EventData::Retired { .. }) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: false,
+                borrowed: false,
+                returned: false,
+                retired: false,
+                lost: false,
+            },
+            Some(EventData::Lost { .. }) => Transition {
+                manufactured: false,
+                put_into_service: false,
+                inspected: false,
+                borrowed: false,
+                returned: false,
+                retired: false,
+                lost: false,
+            },
         }
     }
-    fn discriminant(&self) -> u8 {
-        unsafe { *(self as *const Self as *const u8) }
-    }
-    /// Indicates the kind of the parent event.
-    fn parent_discriminant(&self) -> Option<u8> {
-        match self {
-            EventData::Manufactured {} => None,
-            EventData::PutIntoService {} => None,
-            EventData::Inspected { .. } => None,
-            EventData::Borrowed { .. } => None,
-            EventData::Returned { .. } => Some(
-                EventData::Borrowed {
-                    borrower: "".to_owned(),
-                    validator: "".to_owned(),
-                }
-                .discriminant(),
-            ),
-            EventData::Retired {} => Some(EventData::PutIntoService {}.discriminant()),
-            EventData::Lost {} => Some(EventData::PutIntoService {}.discriminant()),
-        }
+    pub(crate) fn check_transition(last_event: Option<&Self>, next_event: &Self) -> bool {
+        Self::get_transition(last_event).get_value(next_event)
     }
 }

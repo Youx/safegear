@@ -20,7 +20,7 @@ use tokio::task::JoinError;
 
 use crate::{
     db::DbPool,
-    models::{event, user::User},
+    models::{event::EventData, user::User},
 };
 
 pub mod item_create;
@@ -48,8 +48,8 @@ pub enum ApiError {
     PasswordHash(String),
     #[error("Error joining task: {0}")]
     JoinError(#[from] JoinError),
-    #[error("Error creating event: {0}")]
-    EventCreation(event::Error),
+    #[error("Transitioning from event {0:?} to {1:?} is not allowed")]
+    InvalidTransition(Option<EventData>, EventData),
 }
 
 impl IntoResponse for ApiError {
@@ -64,7 +64,7 @@ impl IntoResponse for ApiError {
             ApiError::CannotDeleteSelf => (StatusCode::BAD_REQUEST, message),
             ApiError::PasswordHash(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
             ApiError::JoinError(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
-            ApiError::EventCreation(_) => (StatusCode::BAD_REQUEST, message),
+            ApiError::InvalidTransition(..) => (StatusCode::BAD_REQUEST, message),
         }
         .into_response()
     }
