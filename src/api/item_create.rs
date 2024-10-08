@@ -1,16 +1,18 @@
 use axum::{extract::State, Json};
+use chrono::Utc;
 use diesel::{data_types::PgInterval, BelongingToDsl};
 use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection as _, RunQueryDsl as _};
 
 use crate::{
     models::{
+        event::{Event, EventData},
         item::{InsertItem as InsertItemModel, Item as ItemModel},
         tag::{InsertItemTag, ItemTag},
     },
     schema::*,
 };
 
-use super::{item_list::Item, ApiResult, Application, AuthenticatedUser, ManageItems};
+use super::{item_list::Item, ApiError, ApiResult, Application, AuthenticatedUser, ManageItems};
 
 #[derive(serde::Deserialize, ts_rs::TS)]
 #[ts(export)]
@@ -19,6 +21,8 @@ pub struct CreateItem {
     inspection_period_days: Option<i32>,
     serial_number: Option<String>,
     tags: Vec<i64>,
+    manufactured_on: Option<chrono::DateTime<Utc>>,
+    put_into_service_on: Option<chrono::DateTime<Utc>>,
 }
 
 pub async fn handler(
@@ -32,6 +36,8 @@ pub async fn handler(
         name,
         serial_number,
         inspection_period_days,
+        manufactured_on,
+        put_into_service_on,
     } = data;
     let (item, item_tags) = conn
         .transaction(|mut conn| {
@@ -58,10 +64,25 @@ pub async fn handler(
                     .execute(&mut conn)
                     .await?;
 
+                if let Some(manufactured_on) = manufactured_on {
+                    Event::insert_event(conn, item.id, manufactured_on, EventData::Manufactured {})
+                        .await?;
+                }
+                if let Some(put_into_service_on) = put_into_service_on {
+                    Event::insert_event(
+                        conn,
+                        item.id,
+                        put_into_service_on,
+                        EventData::PutIntoService {},
+                    )
+                    .await?;
+                }
+
                 let item_tags = ItemTag::belonging_to(&item)
                     .get_results::<ItemTag>(&mut conn)
                     .await?;
-                Ok::<_, diesel::result::Error>((item, item_tags))
+
+                Ok::<_, ApiError>((item, item_tags))
             }
             .scope_boxed()
         })

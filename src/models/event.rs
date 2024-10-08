@@ -150,9 +150,9 @@ pub enum InspectionResult {
 #[repr(u8)]
 pub enum EventData {
     /// Event indicating when the item was produced
-    Produced {} = 0,
+    Manufactured {} = 0,
     /// Event when someone puts the item in service
-    PutInService {} = 1,
+    PutIntoService {} = 1,
     /// Event when someone inspects the item
     Inspected {
         /// Name of the person who inspected the item
@@ -185,8 +185,8 @@ impl EventData {
     /// Indicates if this event can happen only once.
     pub(crate) fn is_unique(&self) -> bool {
         match self {
-            EventData::Produced {} => true,
-            EventData::PutInService {} => true,
+            EventData::Manufactured {} => true,
+            EventData::PutIntoService {} => true,
             EventData::Inspected { .. } => false,
             EventData::Borrowed { .. } => false,
             EventData::Returned { .. } => false,
@@ -200,8 +200,8 @@ impl EventData {
     /// Indicates the kind of the parent event.
     fn parent_discriminant(&self) -> Option<u8> {
         match self {
-            EventData::Produced {} => None,
-            EventData::PutInService {} => None,
+            EventData::Manufactured {} => None,
+            EventData::PutIntoService {} => None,
             EventData::Inspected { .. } => None,
             EventData::Borrowed { .. } => None,
             EventData::Returned { .. } => Some(
@@ -211,8 +211,8 @@ impl EventData {
                 }
                 .discriminant(),
             ),
-            EventData::Retired {} => Some(EventData::PutInService {}.discriminant()),
-            EventData::Lost {} => Some(EventData::PutInService {}.discriminant()),
+            EventData::Retired {} => Some(EventData::PutIntoService {}.discriminant()),
+            EventData::Lost {} => Some(EventData::PutIntoService {}.discriminant()),
         }
     }
 }
