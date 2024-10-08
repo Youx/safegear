@@ -84,6 +84,7 @@ pub async fn handler(
         .get_results::<ItemTag>(&mut conn)
         .await?;
     let events = Event::belonging_to(&item)
+        .order_by(events::ts.asc())
         .get_results::<Event>(&mut conn)
         .await?;
 
