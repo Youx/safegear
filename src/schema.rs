@@ -4,7 +4,6 @@ diesel::table! {
     events (id) {
         id -> Int8,
         item_id -> Int8,
-        parent_id -> Nullable<Int8>,
         ts -> Timestamp,
         data -> Jsonb,
     }
