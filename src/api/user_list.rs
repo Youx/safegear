@@ -4,7 +4,7 @@ use diesel_async::RunQueryDsl as _;
 use super::{ApiResult, Application, AuthenticatedUser, ManageUsers};
 use crate::{models::user::User as UserModel, schema};
 
-#[derive(schemars::JsonSchema, serde::Serialize, ts_rs::TS)]
+#[derive(serde::Serialize, ts_rs::TS)]
 #[ts(export)]
 pub struct UserWithPermissions {
     /// Id of the user

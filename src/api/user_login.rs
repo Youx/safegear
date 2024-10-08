@@ -14,14 +14,14 @@ use crate::{
 
 use super::{ApiResult, Application};
 
-#[derive(serde::Deserialize, schemars::JsonSchema, ts_rs::TS)]
+#[derive(serde::Deserialize, ts_rs::TS)]
 #[ts(export)]
 pub struct LoginUser {
     login: String,
     password: String,
 }
 
-#[derive(serde::Serialize, schemars::JsonSchema, ts_rs::TS)]
+#[derive(serde::Serialize, ts_rs::TS)]
 #[ts(export)]
 pub struct UserToken {
     jwt_token: String,

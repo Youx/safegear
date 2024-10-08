@@ -11,7 +11,7 @@ use crate::{
     schema::users,
 };
 
-#[derive(serde::Deserialize, schemars::JsonSchema, ts_rs::TS)]
+#[derive(serde::Deserialize, ts_rs::TS)]
 #[ts(export)]
 pub struct CreateUser {
     login: String,

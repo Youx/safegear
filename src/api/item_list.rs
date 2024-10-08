@@ -8,7 +8,7 @@ use crate::{
     schema,
 };
 
-#[derive(schemars::JsonSchema, serde::Serialize, ts_rs::TS)]
+#[derive(serde::Serialize, ts_rs::TS)]
 #[ts(export)]
 pub struct Item {
     /// Id of the item

@@ -4,7 +4,7 @@ use diesel_async::RunQueryDsl as _;
 use super::{ApiResult, Application, AuthenticatedUser, NoPermission};
 use crate::{models::tag::Tag as TagModel, schema};
 
-#[derive(schemars::JsonSchema, serde::Serialize, ts_rs::TS)]
+#[derive(serde::Serialize, ts_rs::TS)]
 #[ts(export)]
 pub struct Tag {
     /// Id of the tag

@@ -12,7 +12,7 @@ use crate::{
 
 use super::{item_list::Item, ApiResult, Application, AuthenticatedUser, ManageItems};
 
-#[derive(serde::Deserialize, schemars::JsonSchema, ts_rs::TS)]
+#[derive(serde::Deserialize, ts_rs::TS)]
 #[ts(export)]
 pub struct CreateItem {
     name: String,
