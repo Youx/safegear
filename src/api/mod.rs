@@ -11,6 +11,7 @@ use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     TypedHeader,
 };
+use chrono::Utc;
 use jwt_simple::{
     algorithms::{HS256Key, MACLike},
     claims::JWTClaims,
@@ -50,6 +51,11 @@ pub enum ApiError {
     JoinError(#[from] JoinError),
     #[error("Transitioning from event {0:?} to {1:?} is not allowed")]
     InvalidTransition(Option<EventData>, EventData),
+    #[error("Cannot insert event with time {0} after an event with time {1}")]
+    InvalidEventTime(
+        chrono::prelude::DateTime<Utc>,
+        chrono::prelude::DateTime<Utc>,
+    ),
 }
 
 impl IntoResponse for ApiError {
@@ -65,6 +71,7 @@ impl IntoResponse for ApiError {
             ApiError::PasswordHash(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
             ApiError::JoinError(_) => (StatusCode::INTERNAL_SERVER_ERROR, message),
             ApiError::InvalidTransition(..) => (StatusCode::BAD_REQUEST, message),
+            ApiError::InvalidEventTime(..) => (StatusCode::BAD_REQUEST, message),
         }
         .into_response()
     }

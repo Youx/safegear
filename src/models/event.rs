@@ -42,6 +42,13 @@ impl Event {
                     .await
                     .optional()?;
 
+                // cannot insert an event before another
+                if let Some(ref last_event) = last_event {
+                    if ts <= last_event.ts.and_utc() {
+                        return Err(ApiError::InvalidEventTime(last_event.ts.and_utc(), ts));
+                    }
+                }
+
                 // only allow specific event successions
                 // (ex: can only lose or return an item, after a borrow)
                 if !EventData::check_transition(
