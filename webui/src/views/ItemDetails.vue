@@ -7,9 +7,10 @@ import { useRoute } from 'vue-router'
 import ProgressSpinner from 'primevue/progressspinner'
 import Message from 'primevue/message'
 import Tag from 'primevue/tag'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import Panel from 'primevue/panel'
+import Timeline from 'primevue/timeline';
+import type { ItemEvent } from '@/bindings/ItemEvent'
+import EventTimelineItem from '@/components/EventTimelineItem.vue'
 
 const route = useRoute()
 
@@ -56,11 +57,11 @@ async function fetchItemDetails(itemId: bigint) {
         <Tag v-for="tagId in item.tags" :key="tagId" :value="tagsStore.getTag(tagId).name" />
       </dd>
       <Panel class="col-10" header="Events:">
-        <DataTable :value="item.events">
-          <Column field="id" header="#" />
-          <Column field="ts" header="Time" />
-          <Column header="Details" />
-        </DataTable>
+        <Timeline :value="item.events">
+          <template #content="slotProps">
+            <EventTimelineItem :event="slotProps.item" />
+          </template>
+        </Timeline>
       </Panel>
     </dl>
   </div>
