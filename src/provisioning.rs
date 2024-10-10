@@ -1,10 +1,10 @@
-use chrono::{DateTime, Datelike};
+use chrono::{DateTime, Datelike, Months};
 use diesel::{data_types::PgInterval, Insertable as _};
 use diesel_async::RunQueryDsl as _;
 
 use crate::{
     models::{
-        event::{Event, EventData},
+        event::{Event, EventData, InspectionResult},
         item::InsertItem,
         tag::{InsertItemTag, InsertTag},
     },
@@ -203,6 +203,26 @@ pub(crate) async fn provision(
             .with_month(item.5 .1 as u32)
             .unwrap();
         Event::insert_event(conn, item_id, manufactured_on, EventData::Manufactured {}).await?;
+
+        Event::insert_event(
+            conn,
+            item_id,
+            manufactured_on.checked_add_months(Months::new(1)).unwrap(),
+            EventData::PutIntoService {},
+        )
+        .await?;
+
+        Event::insert_event(
+            conn,
+            item_id,
+            manufactured_on.checked_add_months(Months::new(13)).unwrap(),
+            EventData::Inspected {
+                inspector: "Hugo".to_owned(),
+                result: InspectionResult::Good,
+                comment: Some("Nice gear".to_owned()),
+            },
+        )
+        .await?;
 
         for tag in item.4 {
             InsertItemTag {
