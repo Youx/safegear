@@ -8,7 +8,7 @@ import type { DataTableFilterMeta } from 'primevue/datatable'
 const URL = '/api'
 
 class Requester {
-  static async request<T>(url: string, method: 'POST' | 'GET' | 'DELETE' | 'PUT', data: T | undefined): Promise<Response> {
+  static async request<T>(url: string, method: 'POST' | 'GET' | 'DELETE' | 'PUT', data: T | undefined): Promise<Response | undefined> {
     const appSettings = useAppSettingsStore();
     const serializedData = data !== undefined ? JSON.stringify(data) : undefined;
     const headers: {[id: string]: string} = {};
@@ -16,18 +16,23 @@ class Requester {
     if (appSettings.jwtToken) {
       headers['Authorization'] = 'Bearer ' + appSettings.jwtToken;
     }
-    return await fetch(URL + url, {
+    const res = await fetch(URL + url, {
       method,
       headers,
       body: serializedData,
     })
+    if (res.status === 400) {
+      useAppSettingsStore().logout()
+    } else {
+      return res
+    }
   }
   static async post<T, Y>(url: string, data: T): Promise<Y> {
-    const res: Y = JSON.parse(await (await Requester.request(url, 'POST', data)).text());
+    const res: Y = JSON.parse(await (await Requester.request(url, 'POST', data))!.text());
     return res
   }
   static async get<Y>(url: string): Promise<Y> {
-    const res: Y = JSON.parse(await (await Requester.request(url, 'GET', undefined)).text())
+    const res: Y = JSON.parse(await (await Requester.request(url, 'GET', undefined))!.text())
     return res
   }
   static async delete(url: string) {
