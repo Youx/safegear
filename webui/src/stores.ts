@@ -48,7 +48,7 @@ export const useItemsStore = defineStore('items', {
   },
   actions: {
     async details(item_id: bigint): Promise<ItemDetails> {
-      return await Requester.get('/items' + item_id)
+      return await Requester.get('/items/' + item_id)
     },
 
     async refresh() {
