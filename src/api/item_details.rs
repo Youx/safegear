@@ -8,7 +8,11 @@ use diesel_async::RunQueryDsl as _;
 
 use super::{ApiResult, Application, AuthenticatedUser, NoPermission};
 use crate::{
-    models::{event::Event, item::Item as ItemModel, tag::ItemTag},
+    models::{
+        event::{Event, EventData},
+        item::Item as ItemModel,
+        tag::ItemTag,
+    },
     schema::*,
 };
 
@@ -36,6 +40,8 @@ pub struct ItemEvent {
     id: i64,
     /// Timestamp of the event
     ts: chrono::DateTime<Utc>,
+    /// Details of the event
+    data: EventData,
 }
 
 impl From<Event> for ItemEvent {
@@ -43,6 +49,7 @@ impl From<Event> for ItemEvent {
         Self {
             id: value.id,
             ts: chrono::DateTime::from_naive_utc_and_offset(value.ts, Utc),
+            data: value.data,
         }
     }
 }

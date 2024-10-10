@@ -95,6 +95,7 @@ pub enum InspectionResult {
 #[derive(ts_rs::TS, Serialize, Deserialize, Debug, AsExpression)]
 #[diesel(sql_type = Jsonb)]
 #[repr(u8)]
+#[serde(tag = "kind")]
 pub enum EventData {
     /// Event indicating when the item was produced
     Manufactured {} = 0,
