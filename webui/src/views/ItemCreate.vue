@@ -44,13 +44,8 @@ async function submit() {
     </div>
     <div class="field grid justify-content-end col-9">
       <label class="col-4 mb-0" for="name">Name</label>
-      <AutoComplete
-        class="col-6 h-3rem"
-        :dropdown="true"
-        :suggestions="names"
-        v-model="formName"
-        @complete="search($event)"
-      />
+      <AutoComplete class="col-6 h-3rem" :dropdown="true" :suggestions="names" v-model="formName"
+        @complete="search($event)" />
       <div class="col-2"></div>
     </div>
     <div class="field grid justify-content-end col-9">
@@ -80,17 +75,8 @@ async function submit() {
     <div class="field grid col-9">
       <label class="col-4 mb-0" for="tags">Tags</label>
       <div class="col-8">
-        <MultiSelect
-          v-model="formTags"
-          display="chip"
-          :options="tagStore.tags"
-          optionLabel="name"
-          optionValue="id"
-          filter
-          placeholder="Select Tags"
-          :maxSelectedLabels="3"
-          class="col-6 h-3rem"
-        />
+        <MultiSelect v-model="formTags" display="chip" :options="tagStore.tags" optionLabel="name" optionValue="id"
+          filter placeholder="Select Tags" :maxSelectedLabels="3" class="col-6 h-3rem" />
       </div>
     </div>
     <div class="flex justify-content-start col-9">

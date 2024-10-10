@@ -16,6 +16,8 @@ const appSettings = useAppSettingsStore()
       <LoginView v-if="!appSettings.jwtToken" />
       <RouterView v-else />
     </div>
-    <div class="flex flex-none justify-content-center text-xs"><a href="https://github.com/Youx/safegear">SafeGear</a><span> - {{ appInfoStore.version }} - (c) 2024 Hugo Camboulive</span></div>
+    <div class="flex flex-none justify-content-center text-xs"><a
+        href="https://github.com/Youx/safegear">SafeGear</a><span> - {{ appInfoStore.version }} - (c) 2024 Hugo
+        Camboulive</span></div>
   </div>
 </template>
