@@ -6,6 +6,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect'
 import Button from 'primevue/button'
+import DatePicker from 'primevue/datepicker'
 import { ref } from 'vue'
 
 let itemStore = useItemsStore()
@@ -16,6 +17,8 @@ let formName = defineModel('name', { default: '' })
 let formTags = defineModel('tags', { default: () => [] })
 let formInspection = defineModel('formInspection', { default: null })
 let formSerial = defineModel('formSerial', { default: null })
+let formManufacturedOn = defineModel('formManufacturedOn', { default: null })
+let formPutIntoServiceOn = defineModel('formPutIntoServiceOn', { default: null })
 // name autocompletion
 const names = ref(itemStore.names)
 function search(event: AutoCompleteCompleteEvent) {
@@ -27,7 +30,9 @@ async function submit() {
     name: formName.value,
     inspection_period_days: formInspection.value,
     serial_number: formSerial.value,
-    tags: formTags.value
+    tags: formTags.value,
+    manufactured_on: formManufacturedOn.value,
+    put_into_service_on: formPutIntoServiceOn.value,
   })
   router.push('/items')
 }
@@ -58,6 +63,18 @@ async function submit() {
       <label class="col-4 mb-0" for="daysBetweenChecks">Serial number</label>
       <div class="col-8">
         <InputText class="h-3rem" v-model="formSerial" />
+      </div>
+    </div>
+    <div class="field grid justify-content-end col-9">
+      <label class="col-4 mb-0">Manufactured on</label>
+      <div class="col-8">
+        <DatePicker v-model="formManufacturedOn" dateFormat="dd/mm/yy" />
+      </div>
+    </div>
+    <div class="field grid justify-content-end col-9">
+      <label class="col-4 mb-0">Put into service on</label>
+      <div class="col-8">
+        <DatePicker v-model="formPutIntoServiceOn" dateFormat="dd/mm/yy" />
       </div>
     </div>
     <div class="field grid col-9">
